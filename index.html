@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>しましまシミュレーター v001</title>
+<!--
+  ボーダーTシミュレーター（しましまシミュレーター）
+  @version v001
+  担当AI名: Claude / クー
+  更新履歴（最新3件のみ）:
+  - v001 (20260611) 初版。モデル×配色の2軸プリセット、縞の太さ/間隔/胸無地スライダー、
+    地色と線色の入れ替え、ボーダーの読みものページ（歴史・著名人・ブランド年表）
+-->
+<style>
+:root{
+  --ink:#2b2b2b; --muted:#8a8377; --navy:#1f2a44; --cream:#faf7f0;
+  --card:#ffffff; --line:#e5dfd2;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+body{
+  font-family:"Hiragino Sans","Hiragino Kaku Gothic ProN",sans-serif;
+  background:var(--cream); color:var(--ink); line-height:1.7;
+}
+header{
+  border-bottom:1px solid var(--line); background:var(--card);
+  padding:14px 24px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+}
+header .stripes{
+  width:42px; height:42px; border-radius:8px; flex-shrink:0;
+  background:repeating-linear-gradient(180deg,#f2ede0 0 6px,var(--navy) 6px 12px);
+  border:1px solid var(--line);
+}
+header h1{font-size:18px; font-weight:600;}
+header .ver{font-size:12px; color:var(--muted); margin-left:4px;}
+nav{margin-left:auto; display:flex; gap:8px;}
+nav button{
+  font-size:14px; padding:8px 16px; border:1px solid var(--line);
+  border-radius:999px; background:transparent; cursor:pointer; color:var(--ink);
+}
+nav button.on{background:var(--navy); color:#fff; border-color:var(--navy);}
+main{max-width:980px; margin:0 auto; padding:24px;}
+.sim-grid{display:grid; grid-template-columns:minmax(280px,420px) minmax(280px,1fr); gap:24px; align-items:start;}
+@media (max-width:720px){.sim-grid{grid-template-columns:1fr;}}
+.preview{
+  background:var(--card); border:1px solid var(--line); border-radius:14px; padding:20px;
+  position:sticky; top:16px;
+}
+.preview .name{font-size:13px; color:var(--muted); text-align:center; margin-top:8px;}
+.panel{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px 20px; margin-bottom:16px;}
+.panel h2{font-size:14px; font-weight:600; color:var(--navy); margin-bottom:10px;}
+.chips{display:flex; flex-wrap:wrap; gap:6px;}
+.chips button{
+  font-size:13px; padding:6px 12px; border:1px solid var(--line); border-radius:999px;
+  background:#fff; cursor:pointer; color:var(--ink);
+}
+.chips button.on{background:var(--navy); color:#fff; border-color:var(--navy);}
+.swatch{display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:5px; vertical-align:-1px; border:1px solid rgba(0,0,0,.15);}
+.row{display:flex; align-items:center; gap:12px; margin:10px 0;}
+.row label{font-size:13px; color:var(--muted); min-width:76px;}
+.row input[type=range]{flex:1; accent-color:var(--navy);}
+.row output{font-size:13px; font-weight:600; min-width:34px; text-align:right;}
+.row input[type=color]{width:44px; height:32px; border:1px solid var(--line); border-radius:8px; background:#fff; padding:2px; cursor:pointer;}
+#swap{
+  font-size:13px; padding:6px 14px; border:1px solid var(--line); border-radius:8px;
+  background:#fff; cursor:pointer;
+}
+#swap:hover{background:var(--cream);}
+.note{font-size:12px; color:var(--muted); margin-top:8px;}
+article{background:var(--card); border:1px solid var(--line); border-radius:14px; padding:28px 32px; max-width:760px; margin:0 auto;}
+article h2{font-size:20px; color:var(--navy); margin:28px 0 10px; padding-top:18px; border-top:1px dashed var(--line);}
+article h2:first-of-type{margin-top:0; border-top:none; padding-top:0;}
+article p{margin-bottom:12px; font-size:15px;}
+article ul{margin:0 0 12px 1.4em; font-size:15px;}
+article li{margin-bottom:6px;}
+article .src{font-size:12.5px; color:var(--muted);}
+article a{color:var(--navy);}
+.tl{list-style:none; margin-left:0;}
+.tl li{padding-left:84px; position:relative;}
+.tl .y{position:absolute; left:0; font-weight:600; color:var(--navy);}
+footer{text-align:center; font-size:12px; color:var(--muted); padding:24px;}
+.hidden{display:none;}
+</style>
+</head>
+<body>
+<header>
+  <div class="stripes" aria-hidden="true"></div>
+  <h1>しましまシミュレーター<span class="ver">ボーダーTシミュレーター v001</span></h1>
+  <nav>
+    <button id="tabSim" class="on">シミュレーター</button>
+    <button id="tabRead">ボーダーの読みもの</button>
+  </nav>
+</header>
+
+<main>
+<section id="viewSim">
+  <div class="sim-grid">
+    <div class="preview">
+      <svg viewBox="0 0 400 420" width="100%" role="img" aria-label="ボーダーTシャツのプレビュー">
+        <defs>
+          <pattern id="st" patternUnits="userSpaceOnUse" width="10" height="16">
+            <rect id="pBase" width="10" height="16" fill="#F2EDE0"></rect>
+            <rect id="pStripe" width="10" height="8" fill="#1F2A44"></rect>
+          </pattern>
+          <clipPath id="tee">
+            <path d="M95,75 L140,62 Q200,84 260,62 L305,75 L352,232 L318,244 L292,152 L292,382 L108,382 L108,152 L82,244 L48,232 Z"></path>
+          </clipPath>
+        </defs>
+        <g clip-path="url(#tee)">
+          <rect x="30" y="40" width="340" height="360" fill="url(#st)"></rect>
+          <rect id="plainRect" x="30" y="40" width="340" height="0" fill="#F2EDE0"></rect>
+        </g>
+        <path d="M95,75 L140,62 Q200,84 260,62 L305,75 L352,232 L318,244 L292,152 L292,382 L108,382 L108,152 L82,244 L48,232 Z" fill="none" stroke="#c8c0ae" stroke-width="1.5"></path>
+        <path d="M140,62 Q200,84 260,62" fill="none" stroke="#c8c0ae" stroke-width="1.5"></path>
+      </svg>
+      <p class="name" id="modelName">SJウエッソン風</p>
+    </div>
+
+    <div>
+      <div class="panel">
+        <h2>モデル（形とピッチ）</h2>
+        <div class="chips" id="models"></div>
+        <p class="note" id="modelNote"></p>
+      </div>
+
+      <div class="panel">
+        <h2>配色</h2>
+        <div class="chips" id="palettes"></div>
+        <div class="row" style="margin-top:14px;">
+          <label>地色</label>
+          <input type="color" id="base" value="#F2EDE0">
+          <label style="min-width:auto;">線色</label>
+          <input type="color" id="stripe" value="#1F2A44">
+          <button id="swap" title="地色と線色を入れ替える">⇄ 入れ替え</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>縞の調整</h2>
+        <div class="row">
+          <label>線の太さ</label>
+          <input type="range" id="sw" min="2" max="20" step="1" value="8">
+          <output id="swOut">8</output>
+        </div>
+        <div class="row">
+          <label>地の間隔</label>
+          <input type="range" id="gw" min="2" max="32" step="1" value="8">
+          <output id="gwOut">8</output>
+        </div>
+        <div class="row">
+          <label>胸元の無地</label>
+          <input type="range" id="pl" min="0" max="160" step="1" value="0">
+          <output id="plOut">0</output>
+        </div>
+        <p class="note">プリセットはあくまで「〜風」の再現。実物の採寸値を反映したら、この欄に出典を書き足していく。</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="viewRead" class="hidden">
+  <article>
+    <h2>ボーダーシャツの成り立ち</h2>
+    <p>起源は16世紀頃、スペイン・バスク地方の船乗りたちが着ていた手編みのウールやコットンのセーターが縞模様だったことにあるといわれる。日本で「バスクシャツ」と呼ばれるのはこの説に由来する。</p>
+    <p>その後、フランス・ノルマンディーやブルターニュの船乗りたちが、視界の悪い海上でも人を見つけやすいように縞のシャツを着るようになり、これがフランス海軍の水兵の制服「マリニエール」へとつながった。海に落ちた仲間を見つけるための実用の柄が出発点、というのがボーダーの面白いところ。</p>
+
+    <h2>ファッションとしてのヒット</h2>
+    <p>1910年代、ココ・シャネルが漁師や水兵の装いに着想を得たマリンルックを打ち出し、労働着だったボーダーがモードの世界に持ち込まれたといわれる。1923年には芸術家の着用をきっかけに欧米のリゾート地で大流行し、以降「リゾート・休日・自由」のイメージをまとった定番になった。</p>
+    <p>日本では1960年代にセントジェームスが上陸し、1980〜1990年代のマリンスタイル・フレンチカジュアルのブームで一気に広まった。</p>
+
+    <h2>ボーダーを愛した著名人</h2>
+    <ul>
+      <li><strong>パブロ・ピカソ</strong> — ドアノー撮影の「パンの指」の写真があまりに有名。黒（紺）×生成の太めボーダーはいまも「ピカソ配色」と呼ばれる</li>
+      <li><strong>ジェームス・ディーン</strong> — 反骨のアイコンが着ることで、マリンの柄に都会の顔が加わった</li>
+      <li><strong>アンディ・ウォーホル</strong> — サングラスにボーダーがほぼ制服。アートとボーダーの結びつきを決定づけた</li>
+      <li><strong>ココ・シャネル</strong> — 着た人であると同時に、ボーダーをモードに引き上げた張本人</li>
+      <li><strong>ジーン・セバーグ、ブリジット・バルドー</strong> — 1960年代、映画とともにフレンチシックの象徴に</li>
+      <li><strong>ジャン＝ポール・ゴルチエ</strong> — ボーダーを自身のアイデンティティとしてコレクションの主役に据えた</li>
+    </ul>
+
+    <h2>ブランド小年表</h2>
+    <ul class="tl">
+      <li><span class="y">1889</span>セントジェームス創業（モン・サン＝ミッシェル近郊の町サン・ジェームス）。代表作はウエッソン、ナバル</li>
+      <li><span class="y">1936</span>ル・ミノア誕生（ブルターニュ）。生地から縫製までフランス自社工場</li>
+      <li><span class="y">1939</span>オーチバル創業。フランス海軍に制服を納めた歴史を持つ</li>
+      <li><span class="y">1960s</span>セントジェームスが日本上陸</li>
+      <li><span class="y">1980-90s</span>日本のマリンブームの火付け役に。以降、無印良品やユニクロが定番化し、誰の暮らしにもボーダーがある風景になった</li>
+    </ul>
+
+    <h2>参考</h2>
+    <p class="src">・<a href="https://roco2web.com/blogs/koromobito/20240726_165" target="_blank" rel="noopener">世界中で愛され続ける“ボーダー”の魅力｜ROCOCO ONLINE STORE</a><br>
+    ・年代や逸話には諸説あるものが含まれる（ピカソの一枚のシャツのブランドなど）。本ページは「〜といわれる」の粒度で楽しむ読みもの。</p>
+  </article>
+</section>
+</main>
+
+<footer>しましまシミュレーター v001 ／ 担当AI名: Claude / クー ／ 2026-06-11</footer>
+
+<script>
+const VERSION = "ボーダーTシミュレーター_v001";
+const $ = id => document.getElementById(id);
+
+const MODELS = [
+  {id:"sj-ouessant", name:"SJウエッソン風", note:"セントジェームスの定番。厚手・等ピッチ・全面ボーダー。", sw:8, gw:8, pl:0, base:"#F2EDE0", stripe:"#1F2A44"},
+  {id:"sj-naval", name:"SJナバル風", note:"胸元が無地のタイプ。細めの縞が下半分に入る。", sw:6, gw:12, pl:80, base:"#F5F1E6", stripe:"#1F2A44"},
+  {id:"sj-morlaix", name:"SJモーレ風", note:"薄手・細ピッチ。春夏向けの軽い表情。", sw:4, gw:9, pl:0, base:"#F7F4EA", stripe:"#27324F"},
+  {id:"orcival", name:"オーチバル ラッセル風", note:"目の詰まった生地に細めの縞。間隔広めで上品。", sw:6, gw:13, pl:0, base:"#EFE9DA", stripe:"#27324F"},
+  {id:"muji", name:"無印良品風", note:"太番手の白地。日常着のすっきりしたボーダー。", sw:9, gw:14, pl:0, base:"#FFFFFF", stripe:"#2B3A55"},
+  {id:"uniqlo", name:"ユニクロ風", note:"標準的なピッチのクルーT系。気軽な普段着。", sw:7, gw:12, pl:0, base:"#FFFFFF", stripe:"#233A5C"},
+  {id:"original", name:"オリジナル", note:"自由設定。スライダーと色で好きな1枚を。", sw:8, gw:10, pl:0, base:"#FFFFFF", stripe:"#C3A6DE"}
+];
+
+const PALETTES = [
+  {name:"生成×マリン", base:"#F2EDE0", stripe:"#1F2A44"},
+  {name:"ピカソ配色", base:"#F1ECE0", stripe:"#1B1B1B"},
+  {name:"白×マリン", base:"#FFFFFF", stripe:"#1F2A44"},
+  {name:"白×赤", base:"#FFFFFF", stripe:"#B4302E"},
+  {name:"黒×白", base:"#1B1B1B", stripe:"#F5F5F0"},
+  {name:"ラベンダー×白", base:"#FFFFFF", stripe:"#C3A6DE"},
+  {name:"杢グレー×紺", base:"#B8B4AC", stripe:"#2E3440"}
+];
+
+let currentModel = MODELS[0];
+
+function render(){
+  const b = $("base").value, s = $("stripe").value;
+  const sw = +$("sw").value, gw = +$("gw").value, pl = +$("pl").value;
+  const pat = $("st");
+  pat.setAttribute("height", sw + gw);
+  $("pBase").setAttribute("height", sw + gw);
+  $("pBase").setAttribute("fill", b);
+  $("pStripe").setAttribute("height", sw);
+  $("pStripe").setAttribute("fill", s);
+  $("plainRect").setAttribute("fill", b);
+  $("plainRect").setAttribute("height", pl ? 40 + pl : 0);
+  $("swOut").textContent = sw;
+  $("gwOut").textContent = gw;
+  $("plOut").textContent = pl;
+  save();
+}
+
+function applyModel(m){
+  currentModel = m;
+  $("sw").value = m.sw; $("gw").value = m.gw; $("pl").value = m.pl;
+  $("base").value = m.base; $("stripe").value = m.stripe;
+  $("modelName").textContent = m.name;
+  $("modelNote").textContent = m.note;
+  document.querySelectorAll("#models button").forEach(btn =>
+    btn.classList.toggle("on", btn.dataset.id === m.id));
+  render();
+}
+
+const modelsBox = $("models");
+MODELS.forEach(m => {
+  const btn = document.createElement("button");
+  btn.textContent = m.name;
+  btn.dataset.id = m.id;
+  btn.addEventListener("click", () => applyModel(m));
+  modelsBox.appendChild(btn);
+});
+
+const palBox = $("palettes");
+PALETTES.forEach(p => {
+  const btn = document.createElement("button");
+  const dot = document.createElement("span");
+  dot.className = "swatch";
+  dot.style.background = `linear-gradient(135deg, ${p.base} 50%, ${p.stripe} 50%)`;
+  btn.appendChild(dot);
+  btn.appendChild(document.createTextNode(p.name));
+  btn.addEventListener("click", () => {
+    $("base").value = p.base;
+    $("stripe").value = p.stripe;
+    render();
+  });
+  palBox.appendChild(btn);
+});
+
+$("swap").addEventListener("click", () => {
+  const b = $("base").value;
+  $("base").value = $("stripe").value;
+  $("stripe").value = b;
+  render();
+});
+
+["base","stripe","sw","gw","pl"].forEach(id => $(id).addEventListener("input", render));
+
+$("tabSim").addEventListener("click", () => switchTab(true));
+$("tabRead").addEventListener("click", () => switchTab(false));
+function switchTab(sim){
+  $("viewSim").classList.toggle("hidden", !sim);
+  $("viewRead").classList.toggle("hidden", sim);
+  $("tabSim").classList.toggle("on", sim);
+  $("tabRead").classList.toggle("on", !sim);
+}
+
+function save(){
+  try{
+    localStorage.setItem(VERSION, JSON.stringify({
+      model: currentModel.id, base: $("base").value, stripe: $("stripe").value,
+      sw: $("sw").value, gw: $("gw").value, pl: $("pl").value
+    }));
+  }catch(e){}
+}
+function load(){
+  try{
+    const d = JSON.parse(localStorage.getItem(VERSION));
+    if(!d) return false;
+    const m = MODELS.find(x => x.id === d.model) || MODELS[0];
+    applyModel(m);
+    $("base").value = d.base; $("stripe").value = d.stripe;
+    $("sw").value = d.sw; $("gw").value = d.gw; $("pl").value = d.pl;
+    render();
+    return true;
+  }catch(e){ return false; }
+}
+
+if(!load()) applyModel(MODELS[0]);
+</script>
+</body>
+</html>
