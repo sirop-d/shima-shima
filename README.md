@@ -43,9 +43,9 @@ SJウエッソン風、SJナバル風、SJモーレ風、オーチバル風、�
 - SJウエッソン風
 - SJナバル風
 - SJモーレ風
-- オーチバル ラッセル風
-- 無印良品風
-- ユニクロ風
+- 蜂 ラッセル風
+- MJ風
+- UNCL風
 - オリジナル
 
 ### ロードマップ
@@ -96,9 +96,9 @@ Planned / experimental presets include:
 - SJ Ouessant-inspired
 - SJ Naval-inspired
 - SJ Morlaix-inspired
-- Orcival Russell-inspired
-- MUJI-inspired
-- UNIQLO-inspired
+- Bee Russell-inspired
+- MJ-inspired
+- UNCL-inspired
 - Original
 
 ### Roadmap
@@ -149,9 +149,9 @@ Préréglages prévus / expérimentaux :
 - Inspiré de SJ Ouessant
 - Inspiré de SJ Naval
 - Inspiré de SJ Morlaix
-- Inspiré d’Orcival Russell
-- Inspiré de MUJI
-- Inspiré d’UNIQLO
+- Inspiré d’Abeille Russell
+- Inspiré de MJ
+- Inspiré d’UNCL
 - Original
 
 ### Feuille de route
