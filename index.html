@@ -4,15 +4,21 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>shima-shima</title>
+<meta property="og:title" content="shima-shima">
+<meta property="og:description" content="A playful border T-shirt simulator for classic marine stripes and original shima-shima designs.">
+<meta property="og:image" content="https://sirop-d.github.io/shima-shima/assets/ogp.png">
+<meta property="og:url" content="https://sirop-d.github.io/shima-shima/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
 <!--
   shima-shima — border tee simulator
-  @version v003
+  @version v004
   担当AI名: Claude / クー
   更新履歴（最新3件のみ）:
-  - v003 (20260611) モデル選択をプルダウン化、右上に日英仏切替、モデル名刷新（蜂ラッセル風/MJ風/UNCL風）、
-    favoritesタブ新設（★0-5評価・★順/新旧ソート・削除・呼び出し）、フッターを shima-shima by sirop に
-  - v002 (20260611) UI全面刷新。エディトリアル調へ。長袖シルエット化、カスタムスライダー
-  - v001 (20260611) 初版。モデル×配色プリセット、縞調整、入れ替え、読みものページ
+  - v004 (20260611) favorites拡張（手動ソートD&D＋▲▼・リネーム・A→Z/Z→Aソート）、
+    共有リンク（1枚/favorites全体）、今日の一枚、マイカラー登録、favorites画像DL（QR付き）、OGPカード対応
+  - v003 (20260611) プルダウン化、日英仏切替、モデル名刷新、favoritesタブ（★評価・ソート・削除）
+  - v002 (20260611) UI全面刷新。エディトリアル調へ。長袖シルエット化
 -->
 <style>
 :root{
@@ -54,11 +60,12 @@ main{max-width:1020px; margin:0 auto; padding:64px 48px 80px;}
 .caption{text-align:center; margin-top:28px;}
 .caption .name{font-family:var(--serif); font-size:15px; letter-spacing:.08em;}
 .caption .spec{font-size:10px; letter-spacing:.3em; color:var(--faint); margin-top:6px;}
-#addFav{
-  font-size:10px; letter-spacing:.22em; color:var(--gray); margin-top:20px;
+.capbtns{display:flex; gap:24px; justify-content:center; margin-top:20px;}
+.capbtns button, .favtools button{
+  font-size:10px; letter-spacing:.2em; color:var(--gray);
   border-bottom:1px solid transparent; padding-bottom:2px;
 }
-#addFav:hover{color:var(--ink); border-bottom-color:var(--ink);}
+.capbtns button:hover, .favtools button:hover{color:var(--ink); border-bottom-color:var(--ink);}
 .ctrl h2{
   font-size:10px; font-weight:400; letter-spacing:.3em; color:var(--gray);
   text-transform:uppercase; margin-bottom:14px;
@@ -70,11 +77,17 @@ main{max-width:1020px; margin:0 auto; padding:64px 48px 80px;}
   border-bottom:1px solid var(--hairline); padding:6px 18px 6px 0;
 }
 .model-note{font-size:11px; color:var(--faint); margin-top:12px; line-height:1.7;}
-.dots{display:flex; flex-wrap:wrap; gap:14px; padding:2px;}
+.dots{display:flex; flex-wrap:wrap; gap:14px; padding:2px; align-items:center;}
 .dots button{
   width:22px; height:22px; border-radius:50%; border:1px solid var(--hairline);
 }
 .dots button.on{outline:1px solid var(--ink); outline-offset:3px;}
+.dots .addc{
+  font-size:14px; color:var(--gray); line-height:1; background:transparent;
+  display:flex; align-items:center; justify-content:center;
+}
+.dots .addc:hover{color:var(--ink); border-color:var(--gray);}
+#myColors{margin-top:12px;}
 .pickers{display:flex; align-items:center; gap:14px; margin-top:22px;}
 .pickers label{font-size:11px; color:var(--gray); letter-spacing:.08em;}
 input[type=color]{
@@ -103,21 +116,43 @@ input[type=range]::-moz-range-thumb{
   width:11px; height:11px; border-radius:50%; background:var(--ink); border:none; cursor:pointer;
 }
 .footnote{font-size:10.5px; color:var(--faint); line-height:1.7; padding-top:24px;}
-.favhead{display:flex; align-items:baseline; justify-content:space-between; max-width:720px; margin:0 auto 8px;}
+.favhead{display:flex; align-items:baseline; justify-content:space-between; max-width:720px; margin:0 auto 8px; gap:20px; flex-wrap:wrap;}
 .favhead h2{font-size:10px; font-weight:400; letter-spacing:.3em; color:var(--gray); text-transform:uppercase;}
+.favtools{display:flex; gap:20px; align-items:baseline;}
 #sortSel{font-size:10.5px; letter-spacing:.12em; color:var(--gray);}
+#sharedBar{
+  max-width:720px; margin:0 auto 8px; display:flex; gap:20px; align-items:baseline;
+  font-size:11px; color:var(--gray); letter-spacing:.08em; padding:10px 0;
+  border-bottom:1px solid var(--hairline);
+}
+#sharedBar button{
+  font-size:10px; letter-spacing:.18em; color:var(--gray);
+  border-bottom:1px solid transparent; padding-bottom:2px;
+}
+#sharedBar button:hover{color:var(--ink); border-bottom-color:var(--ink);}
 #favList{max-width:720px; margin:0 auto;}
-.fav{display:flex; align-items:center; gap:20px; padding:20px 0; border-bottom:1px solid var(--hairline);}
+.fav{display:flex; align-items:center; gap:18px; padding:20px 0; border-bottom:1px solid var(--hairline);}
+.fav .grip{color:var(--faint); font-size:14px; cursor:grab; user-select:none;}
 .fav .sw{width:46px; height:46px; border:1px solid var(--hairline); cursor:pointer; flex-shrink:0;}
 .fav .info{flex:1; min-width:0; cursor:pointer;}
-.fav .nm{font-size:12.5px; letter-spacing:.1em;}
+.fav .nm{font-size:12.5px; letter-spacing:.1em; display:flex; align-items:baseline; gap:10px;}
+.fav .nm input{
+  border:none; border-bottom:1px solid var(--hairline); background:transparent;
+  font:inherit; outline:none; width:100%; max-width:260px; padding:0;
+}
+.fav .ren{font-size:11px; color:var(--faint);}
+.fav .ren:hover{color:var(--ink);}
 .fav .sp{font-size:9.5px; letter-spacing:.24em; color:var(--faint); margin-top:3px;}
 .fav .dt{font-size:9.5px; letter-spacing:.12em; color:var(--faint); margin-top:3px;}
 .fav .stars{display:flex; gap:3px;}
-.fav .stars button{font-size:13px; color:var(--faint); line-height:1;}
-.fav .stars button.on{color:var(--ink);}
+.fav .stars button, .fav .stars span{font-size:13px; color:var(--faint); line-height:1;}
+.fav .stars .on{color:var(--ink);}
+.fav .ud{display:flex; flex-direction:column; gap:6px;}
+.fav .ud button{font-size:8px; color:var(--faint); line-height:1;}
+.fav .ud button:hover{color:var(--ink);}
 .fav .del{font-size:14px; color:var(--faint); padding:0 2px;}
 .fav .del:hover{color:var(--ink);}
+.fav.dragover{border-top:1px solid var(--ink);}
 .empty{max-width:720px; margin:48px auto; text-align:center; font-size:12px; color:var(--faint); letter-spacing:.08em;}
 article{max-width:620px; margin:0 auto;}
 article .lede{font-family:var(--serif); font-size:16px; line-height:2.2; margin-bottom:48px;}
@@ -138,7 +173,7 @@ article .tl .t{font-family:var(--serif); font-size:13.5px; line-height:2; flex:1
 article .src{font-size:11px; color:var(--faint); line-height:1.9;}
 article a{color:var(--gray);}
 footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint); padding:48px 0 40px;}
-.hidden{display:none;}
+.hidden{display:none !important;}
 </style>
 </head>
 <body>
@@ -181,7 +216,11 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
     <div class="caption">
       <p class="name" id="modelName"></p>
       <p class="spec" id="specLine"></p>
-      <button id="addFav"></button>
+      <div class="capbtns">
+        <button id="todayBtn"></button>
+        <button id="shareBtn"></button>
+        <button id="addFav"></button>
+      </div>
     </div>
   </div>
 
@@ -195,6 +234,7 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
     <section>
       <h2 id="hColor">colorway</h2>
       <div class="dots" id="palettes"></div>
+      <div class="dots" id="myColors"></div>
       <div class="pickers">
         <label id="lbBase" for="base"></label><input type="color" id="base" value="#F2EDE0">
         <label id="lbStripe" for="stripe"></label><input type="color" id="stripe" value="#1F2A44">
@@ -226,8 +266,17 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
 
 <section id="viewFav" class="hidden">
   <div class="favhead">
-    <h2>favorites</h2>
-    <select id="sortSel"></select>
+    <h2 id="favTitle">favorites</h2>
+    <div class="favtools" id="favTools">
+      <button id="shareFavsBtn"></button>
+      <button id="dlBtn"></button>
+      <select id="sortSel"></select>
+    </div>
+  </div>
+  <div id="sharedBar" class="hidden">
+    <span id="sharedMsg"></span>
+    <button id="importBtn"></button>
+    <button id="closeShared"></button>
   </div>
   <div id="favList"></div>
 </section>
@@ -239,11 +288,13 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
 
 <footer>shima-shima by sirop</footer>
 
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
 <script>
-const VERSION = "ボーダーTシミュレーター_v003";
+const VERSION = "ボーダーTシミュレーター_v004";
 const KEY_STATE = "shima-shima_state";
 const KEY_FAVS = "shima-shima_favorites";
 const KEY_LANG = "shima-shima_lang";
+const KEY_MYCOLORS = "shima-shima_mycolors";
 const $ = id => document.getElementById(id);
 
 const MODELS = [
@@ -266,6 +317,9 @@ const PALETTES = [
   {base:"#B8B4AC", stripe:"#2E3440"}
 ];
 
+const TODAY_LIGHTS = ["#F2EDE0","#F5F1E6","#FFFFFF","#F1ECE0","#E8D9B0","#B8B4AC","#F3E3E3","#E3EAE3"];
+const TODAY_DARKS = ["#1F2A44","#27324F","#B4302E","#1B1B1B","#2E5E4E","#36598A","#8A4B6B","#B87D3B","#2E3440","#6B5B95"];
+
 const I18N = {
 ja:{
   nav:["simulator","favorites","journal"],
@@ -287,9 +341,15 @@ ja:{
   sw:"線の太さ", gw:"地の間隔", pl:"胸元の無地",
   footnote:"プリセットは実在の名作を観察した「〜風」の再現です。特定ブランドの公式設定ではありません。",
   addFav:"＋ お気に入りに登録", added:"登録しました",
-  sorts:["★順","新しい順","古い順"],
+  today:"今日の一枚", todayName:"今日の一枚",
+  share:"共有リンク", copied:"✓ コピーしました",
+  shareFavs:"share", download:"save image",
+  sorts:["★順","新しい順","古い順","A→Z","Z→A","手動"],
   empty:"まだお気に入りがありません。simulatorで「お気に入りに登録」を。",
-  del:"削除",
+  del:"削除", rename:"名前を変更",
+  myColorAdd:"いまの配色をマイカラーに登録", myColorTip:"クリックで適用 / ダブルクリックで削除",
+  sharedTitle:"共有されたお気に入り", importFavs:"自分のfavoritesに取り込む", close:"閉じる",
+  posterTitle:"MY FAVORITE SHIMA-SHIMA",
   journal:{
     lede:"ボーダーTは、ただの柄ではなく、海で働く人の背中から暮らしの定番へと歩いてきた「線の服」。その来歴を、歩く速度で。",
     sections:[
@@ -343,9 +403,15 @@ en:{
   sw:"stripe width", gw:"spacing", pl:"plain chest",
   footnote:"Presets are observations “in the style of” beloved classics — not official specifications of any brand.",
   addFav:"＋ save to favorites", added:"saved",
-  sorts:["by rating","newest","oldest"],
+  today:"today’s stripe", todayName:"today’s stripe",
+  share:"share link", copied:"✓ copied",
+  shareFavs:"share", download:"save image",
+  sorts:["by rating","newest","oldest","A→Z","Z→A","manual"],
   empty:"No favorites yet — save one from the simulator.",
-  del:"delete",
+  del:"delete", rename:"rename",
+  myColorAdd:"save current colors", myColorTip:"click to apply / double-click to remove",
+  sharedTitle:"shared favorites", importFavs:"add to my favorites", close:"close",
+  posterTitle:"MY FAVORITE SHIMA-SHIMA",
   journal:{
     lede:"The breton stripe is more than a pattern — a garment of lines that walked from sailors’ backs into everyday wardrobes. Its story, at walking pace.",
     sections:[
@@ -399,9 +465,15 @@ fr:{
   sw:"épaisseur", gw:"espacement", pl:"plastron uni",
   footnote:"Les préréglages sont des observations « dans l’esprit de » classiques aimés — aucune spécification officielle d’une marque.",
   addFav:"＋ ajouter aux favoris", added:"ajouté",
-  sorts:["par note","récents","anciens"],
+  today:"la rayure du jour", todayName:"la rayure du jour",
+  share:"lien de partage", copied:"✓ copié",
+  shareFavs:"partager", download:"image",
+  sorts:["par note","récents","anciens","A→Z","Z→A","manuel"],
   empty:"Pas encore de favoris — enregistrez-en depuis le simulateur.",
-  del:"supprimer",
+  del:"supprimer", rename:"renommer",
+  myColorAdd:"garder ces couleurs", myColorTip:"clic pour appliquer / double-clic pour retirer",
+  sharedTitle:"favoris partagés", importFavs:"ajouter à mes favoris", close:"fermer",
+  posterTitle:"MY FAVORITE SHIMA-SHIMA",
   journal:{
     lede:"La marinière est plus qu’un motif — un vêtement de lignes, passé du dos des marins aux garde-robes de tous les jours. Son histoire, au pas de promenade.",
     sections:[
@@ -440,9 +512,23 @@ fr:{
 let lang = "ja";
 let currentModel = MODELS[0];
 let favs = [];
+let myColors = [];
 let sortMode = 0;
+let sharedFavs = null;
+let captionOverride = null;
+let dragId = null;
 
 function t(){ return I18N[lang]; }
+const collator = new Intl.Collator(["ja"], {numeric:true, sensitivity:"base"});
+const dispName = f => f.name || t().models[f.model] || f.model;
+
+const b64e = s => btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const b64d = s => {
+  s = s.replace(/-/g,"+").replace(/_/g,"/");
+  while(s.length % 4) s += "=";
+  return new TextDecoder().decode(Uint8Array.from(atob(s), c => c.charCodeAt(0)));
+};
+const pageUrl = () => location.href.split("#")[0];
 
 function render(){
   const b = $("base").value, s = $("stripe").value;
@@ -458,21 +544,25 @@ function render(){
   $("gwOut").textContent = gw;
   $("plOut").textContent = pl;
   $("specLine").textContent = `STRIPE ${sw} · GAP ${gw} · PLAIN ${pl}`;
-  $("modelName").textContent = t().models[currentModel.id];
+  $("modelName").textContent = captionOverride || t().models[currentModel.id];
   markPalette();
   saveState();
 }
 
 function markPalette(){
   const b = $("base").value.toUpperCase(), s = $("stripe").value.toUpperCase();
-  document.querySelectorAll("#palettes button").forEach((btn, i) => {
-    const p = PALETTES[i];
+  const mark = (sel, arr) => document.querySelectorAll(sel).forEach((btn, i) => {
+    const p = arr[i];
+    if(!p) return;
     btn.classList.toggle("on", p.base.toUpperCase() === b && p.stripe.toUpperCase() === s);
   });
+  mark("#palettes button", PALETTES);
+  mark("#myColors button:not(.addc)", myColors);
 }
 
 function applyModel(m, keepValues){
   currentModel = m;
+  captionOverride = null;
   if(!keepValues){
     $("sw").value = m.sw; $("gw").value = m.gw; $("pl").value = m.pl;
     $("base").value = m.base; $("stripe").value = m.stripe;
@@ -506,10 +596,50 @@ PALETTES.forEach(p => {
   btn.addEventListener("click", () => {
     $("base").value = p.base;
     $("stripe").value = p.stripe;
+    captionOverride = null;
     render();
   });
   palBox.appendChild(btn);
 });
+
+function renderMyColors(){
+  const box = $("myColors");
+  box.innerHTML = "";
+  myColors.forEach((p, i) => {
+    const btn = document.createElement("button");
+    btn.style.background = `linear-gradient(135deg, ${p.base} 50%, ${p.stripe} 50%)`;
+    btn.title = t().myColorTip;
+    btn.setAttribute("aria-label", `${p.base} / ${p.stripe}`);
+    btn.addEventListener("click", () => {
+      $("base").value = p.base;
+      $("stripe").value = p.stripe;
+      captionOverride = null;
+      render();
+    });
+    btn.addEventListener("dblclick", () => {
+      myColors.splice(i, 1);
+      saveMyColors();
+      renderMyColors();
+      markPalette();
+    });
+    box.appendChild(btn);
+  });
+  const add = document.createElement("button");
+  add.className = "addc";
+  add.textContent = "+";
+  add.title = t().myColorAdd;
+  add.setAttribute("aria-label", t().myColorAdd);
+  add.addEventListener("click", () => {
+    const b = $("base").value, s = $("stripe").value;
+    if(!myColors.some(p => p.base.toUpperCase() === b.toUpperCase() && p.stripe.toUpperCase() === s.toUpperCase())){
+      myColors.push({base: b, stripe: s});
+      saveMyColors();
+      renderMyColors();
+      markPalette();
+    }
+  });
+  box.appendChild(add);
+}
 
 $("swap").addEventListener("click", () => {
   const b = $("base").value;
@@ -518,7 +648,63 @@ $("swap").addEventListener("click", () => {
   render();
 });
 
-["base","stripe","sw","gw","pl"].forEach(id => $(id).addEventListener("input", render));
+["base","stripe","sw","gw","pl"].forEach(id => $(id).addEventListener("input", () => {
+  captionOverride = null;
+  render();
+}));
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let x = Math.imul(a ^ a >>> 15, 1 | a);
+    x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x;
+    return ((x ^ x >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+$("todayBtn").addEventListener("click", () => {
+  const now = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  const rng = mulberry32(seed);
+  let base = TODAY_LIGHTS[Math.floor(rng() * TODAY_LIGHTS.length)];
+  let stripe = TODAY_DARKS[Math.floor(rng() * TODAY_DARKS.length)];
+  if(rng() < 0.15){ const tmp = base; base = stripe; stripe = tmp; }
+  const sw = 3 + Math.floor(rng() * 12);
+  const gw = 4 + Math.floor(rng() * 17);
+  const pl = rng() < 0.15 ? 60 + Math.floor(rng() * 60) : 0;
+  currentModel = MODELS.find(m => m.id === "original");
+  $("modelSel").value = "original";
+  $("modelNote").textContent = t().notes.original;
+  $("base").value = base; $("stripe").value = stripe;
+  $("sw").value = sw; $("gw").value = gw; $("pl").value = pl;
+  const pad = n => String(n).padStart(2, "0");
+  captionOverride = `${t().todayName} — ${pad(now.getMonth()+1)}.${pad(now.getDate())}`;
+  render();
+});
+
+function copyText(url, btn){
+  const done = () => {
+    const orig = btn.dataset.label;
+    btn.textContent = t().copied;
+    setTimeout(() => { btn.textContent = orig; }, 1400);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done, () => window.prompt("URL", url));
+  }else{
+    window.prompt("URL", url);
+  }
+}
+
+$("shareBtn").addEventListener("click", () => {
+  const d = [currentModel.id, +$("sw").value, +$("gw").value, +$("pl").value, $("base").value, $("stripe").value];
+  copyText(pageUrl() + "#d=" + b64e(JSON.stringify(d)), $("shareBtn"));
+});
+
+$("shareFavsBtn").addEventListener("click", () => {
+  if(!favs.length) return;
+  const arr = sortedFavs().map(f => [f.model, f.sw, f.gw, f.pl, f.base, f.stripe, f.rating, f.name || 0]);
+  copyText(pageUrl() + "#f=" + b64e(JSON.stringify(arr)), $("shareFavsBtn"));
+});
 
 const VIEWS = {sim:"viewSim", fav:"viewFav", jour:"viewJour"};
 const TABS = {sim:"tabSim", fav:"tabFav", jour:"tabRead"};
@@ -532,12 +718,14 @@ function switchTab(view){
 Object.keys(TABS).forEach(v => $(TABS[v]).addEventListener("click", () => switchTab(v)));
 
 $("addFav").addEventListener("click", () => {
+  const maxOrder = favs.reduce((m, f) => Math.max(m, f.order ?? 0), -1);
   favs.push({
     id: Date.now(),
     model: currentModel.id,
     base: $("base").value, stripe: $("stripe").value,
     sw: +$("sw").value, gw: +$("gw").value, pl: +$("pl").value,
-    rating: 0
+    rating: 0,
+    order: maxOrder + 1
   });
   saveFavs();
   const btn = $("addFav");
@@ -549,41 +737,125 @@ function sortedFavs(){
   const a = favs.slice();
   if(sortMode === 0) a.sort((x,y) => y.rating - x.rating || y.id - x.id);
   else if(sortMode === 1) a.sort((x,y) => y.id - x.id);
-  else a.sort((x,y) => x.id - y.id);
+  else if(sortMode === 2) a.sort((x,y) => x.id - y.id);
+  else if(sortMode === 3) a.sort((x,y) => collator.compare(dispName(x), dispName(y)));
+  else if(sortMode === 4) a.sort((x,y) => collator.compare(dispName(y), dispName(x)));
+  else a.sort((x,y) => (x.order ?? 0) - (y.order ?? 0));
   return a;
 }
 
-function renderFavs(){
-  const box = $("favList");
-  box.innerHTML = "";
-  if(!favs.length){
-    const p = document.createElement("p");
-    p.className = "empty";
-    p.textContent = t().empty;
-    box.appendChild(p);
-    return;
+function commitManualOrder(arr){
+  arr.forEach((f, i) => { f.order = i; });
+  saveFavs();
+  renderFavs();
+}
+
+function startRename(f, nmEl){
+  const input = document.createElement("input");
+  input.value = dispName(f);
+  input.maxLength = 40;
+  nmEl.innerHTML = "";
+  nmEl.appendChild(input);
+  input.focus();
+  input.select();
+  let done = false;
+  const commit = () => {
+    if(done) return;
+    done = true;
+    const v = input.value.trim();
+    if(!v || v === (t().models[f.model] || f.model)) delete f.name;
+    else f.name = v;
+    saveFavs();
+    renderFavs();
+  };
+  input.addEventListener("keydown", e => {
+    if(e.key === "Enter") commit();
+    if(e.key === "Escape"){ done = true; renderFavs(); }
+  });
+  input.addEventListener("blur", commit);
+  input.addEventListener("click", e => e.stopPropagation());
+}
+
+function favRow(f, opts){
+  const manual = opts.manual, readonly = opts.readonly;
+  const row = document.createElement("div");
+  row.className = "fav";
+
+  if(manual && !readonly){
+    const grip = document.createElement("span");
+    grip.className = "grip";
+    grip.textContent = "≡";
+    row.appendChild(grip);
+    row.draggable = true;
+    row.addEventListener("dragstart", e => {
+      dragId = f.id;
+      e.dataTransfer.effectAllowed = "move";
+    });
+    row.addEventListener("dragover", e => {
+      e.preventDefault();
+      row.classList.add("dragover");
+    });
+    row.addEventListener("dragleave", () => row.classList.remove("dragover"));
+    row.addEventListener("drop", e => {
+      e.preventDefault();
+      row.classList.remove("dragover");
+      if(dragId === null || dragId === f.id) return;
+      const arr = sortedFavs();
+      const from = arr.findIndex(x => x.id === dragId);
+      const to = arr.findIndex(x => x.id === f.id);
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      dragId = null;
+      commitManualOrder(arr);
+    });
   }
-  sortedFavs().forEach(f => {
-    const row = document.createElement("div");
-    row.className = "fav";
 
-    const sw = document.createElement("div");
-    sw.className = "sw";
-    sw.style.background = `repeating-linear-gradient(180deg, ${f.stripe} 0 ${f.sw/2}px, ${f.base} ${f.sw/2}px ${(f.sw+f.gw)/2}px)`;
-    sw.addEventListener("click", () => loadFav(f));
+  const sw = document.createElement("div");
+  sw.className = "sw";
+  sw.style.background = `repeating-linear-gradient(180deg, ${f.stripe} 0 ${f.sw/2}px, ${f.base} ${f.sw/2}px ${(f.sw+f.gw)/2}px)`;
+  sw.addEventListener("click", () => loadFav(f));
 
-    const info = document.createElement("div");
-    info.className = "info";
-    const d = new Date(f.id);
-    const pad = n => String(n).padStart(2,"0");
-    info.innerHTML = `<p class="nm">${t().models[f.model] || f.model}</p>
-      <p class="sp">STRIPE ${f.sw} · GAP ${f.gw} · PLAIN ${f.pl} · ${f.base.toUpperCase()} / ${f.stripe.toUpperCase()}</p>
-      <p class="dt">${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}</p>`;
-    info.addEventListener("click", () => loadFav(f));
+  const info = document.createElement("div");
+  info.className = "info";
+  const d = new Date(f.id);
+  const pad = n => String(n).padStart(2, "0");
+  const nm = document.createElement("p");
+  nm.className = "nm";
+  const nameSpan = document.createElement("span");
+  nameSpan.textContent = dispName(f);
+  nm.appendChild(nameSpan);
+  if(!readonly){
+    const ren = document.createElement("button");
+    ren.className = "ren";
+    ren.textContent = "✎";
+    ren.title = t().rename;
+    ren.setAttribute("aria-label", t().rename);
+    ren.addEventListener("click", e => {
+      e.stopPropagation();
+      startRename(f, nm);
+    });
+    nm.appendChild(ren);
+  }
+  const sp = document.createElement("p");
+  sp.className = "sp";
+  sp.textContent = `STRIPE ${f.sw} · GAP ${f.gw} · PLAIN ${f.pl} · ${f.base.toUpperCase()} / ${f.stripe.toUpperCase()}`;
+  const dt = document.createElement("p");
+  dt.className = "dt";
+  dt.textContent = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  info.appendChild(nm);
+  info.appendChild(sp);
+  info.appendChild(dt);
+  info.addEventListener("click", () => loadFav(f));
 
-    const stars = document.createElement("div");
-    stars.className = "stars";
-    for(let i = 1; i <= 5; i++){
+  const stars = document.createElement("div");
+  stars.className = "stars";
+  for(let i = 1; i <= 5; i++){
+    if(readonly){
+      const st = document.createElement("span");
+      st.textContent = i <= f.rating ? "★" : "☆";
+      if(i <= f.rating) st.classList.add("on");
+      stars.appendChild(st);
+    }else{
       const st = document.createElement("button");
       st.textContent = i <= f.rating ? "★" : "☆";
       st.classList.toggle("on", i <= f.rating);
@@ -595,7 +867,32 @@ function renderFavs(){
       });
       stars.appendChild(st);
     }
+  }
 
+  row.appendChild(sw);
+  row.appendChild(info);
+  row.appendChild(stars);
+
+  if(manual && !readonly){
+    const ud = document.createElement("div");
+    ud.className = "ud";
+    [["▲", -1], ["▼", 1]].forEach(([sym, dir]) => {
+      const b = document.createElement("button");
+      b.textContent = sym;
+      b.addEventListener("click", () => {
+        const arr = sortedFavs();
+        const i = arr.findIndex(x => x.id === f.id);
+        const j = i + dir;
+        if(j < 0 || j >= arr.length) return;
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        commitManualOrder(arr);
+      });
+      ud.appendChild(b);
+    });
+    row.appendChild(ud);
+  }
+
+  if(!readonly){
     const del = document.createElement("button");
     del.className = "del";
     del.textContent = "×";
@@ -606,13 +903,33 @@ function renderFavs(){
       saveFavs();
       renderFavs();
     });
-
-    row.appendChild(sw);
-    row.appendChild(info);
-    row.appendChild(stars);
     row.appendChild(del);
-    box.appendChild(row);
-  });
+  }
+  return row;
+}
+
+function renderFavs(){
+  const box = $("favList");
+  box.innerHTML = "";
+  const shared = sharedFavs !== null;
+  $("favTools").classList.toggle("hidden", shared);
+  $("sharedBar").classList.toggle("hidden", !shared);
+  $("favTitle").textContent = shared ? t().sharedTitle : "favorites";
+
+  if(shared){
+    $("sharedMsg").textContent = `${sharedFavs.length}`;
+    sharedFavs.forEach(f => box.appendChild(favRow(f, {manual:false, readonly:true})));
+    return;
+  }
+  if(!favs.length){
+    const p = document.createElement("p");
+    p.className = "empty";
+    p.textContent = t().empty;
+    box.appendChild(p);
+    return;
+  }
+  const manual = sortMode === 5;
+  sortedFavs().forEach(f => box.appendChild(favRow(f, {manual, readonly:false})));
 }
 
 function loadFav(f){
@@ -622,6 +939,7 @@ function loadFav(f){
   $("sw").value = f.sw; $("gw").value = f.gw; $("pl").value = f.pl;
   $("modelSel").value = m.id;
   $("modelNote").textContent = t().notes[m.id];
+  captionOverride = f.name || null;
   render();
   switchTab("sim");
 }
@@ -642,6 +960,123 @@ function buildSortSel(){
   });
   sel.value = sortMode;
 }
+
+$("importBtn").addEventListener("click", () => {
+  if(!sharedFavs) return;
+  let maxOrder = favs.reduce((m, f) => Math.max(m, f.order ?? 0), -1);
+  const now = Date.now();
+  sharedFavs.forEach((f, i) => {
+    favs.push({
+      id: now + i, model: f.model, base: f.base, stripe: f.stripe,
+      sw: f.sw, gw: f.gw, pl: f.pl, rating: f.rating || 0,
+      ...(f.name ? {name: f.name} : {}),
+      order: ++maxOrder
+    });
+  });
+  saveFavs();
+  sharedFavs = null;
+  renderFavs();
+});
+
+$("closeShared").addEventListener("click", () => {
+  sharedFavs = null;
+  renderFavs();
+});
+
+$("dlBtn").addEventListener("click", () => {
+  const list = sortedFavs();
+  if(!list.length) return;
+  const W = 1080, headH = 210, rowH = 124, footH = 240;
+  const H = headH + list.length * rowH + footH;
+  const cv = document.createElement("canvas");
+  cv.width = W; cv.height = H;
+  const ctx = cv.getContext("2d");
+  ctx.fillStyle = "#faf9f6";
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle = "#1c1b19";
+  ctx.font = "26px 'Helvetica Neue', Helvetica, sans-serif";
+  try{ ctx.letterSpacing = "10px"; }catch(e){}
+  ctx.fillText(t().posterTitle, 80, 110);
+  try{ ctx.letterSpacing = "4px"; }catch(e){}
+  ctx.fillStyle = "#8e8a82";
+  ctx.font = "15px 'Helvetica Neue', Helvetica, sans-serif";
+  const now = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  ctx.fillText(`${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())}`, 80, 145);
+  ctx.strokeStyle = "#e3e0d8";
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(80, headH - 30); ctx.lineTo(W - 80, headH - 30); ctx.stroke();
+
+  try{ ctx.letterSpacing = "0px"; }catch(e){}
+  list.forEach((f, idx) => {
+    const y = headH + idx * rowH;
+    const sx = 80, sy = y + 14, ss = 84;
+    ctx.fillStyle = f.base;
+    ctx.fillRect(sx, sy, ss, ss);
+    ctx.fillStyle = f.stripe;
+    const period = (f.sw + f.gw) / 2;
+    for(let yy = 0; yy < ss; yy += period){
+      ctx.fillRect(sx, sy + yy, ss, Math.min(f.sw / 2, ss - yy));
+    }
+    ctx.strokeStyle = "#e3e0d8";
+    ctx.strokeRect(sx, sy, ss, ss);
+
+    ctx.fillStyle = "#1c1b19";
+    ctx.font = "22px 'Hiragino Sans', 'Helvetica Neue', sans-serif";
+    ctx.fillText(dispName(f), 200, y + 48);
+    ctx.fillStyle = "#8e8a82";
+    ctx.font = "13px 'Helvetica Neue', Helvetica, sans-serif";
+    ctx.fillText(`STRIPE ${f.sw} · GAP ${f.gw} · PLAIN ${f.pl} · ${f.base.toUpperCase()} / ${f.stripe.toUpperCase()}`, 200, y + 78);
+    ctx.font = "18px 'Hiragino Sans', sans-serif";
+    ctx.fillStyle = "#1c1b19";
+    const filled = "★".repeat(f.rating);
+    ctx.fillText(filled, W - 240, y + 55);
+    ctx.fillStyle = "#c9c5bb";
+    ctx.fillText("★".repeat(5 - f.rating), W - 240 + ctx.measureText(filled).width, y + 55);
+
+    ctx.strokeStyle = "#e3e0d8";
+    ctx.beginPath(); ctx.moveTo(80, y + rowH - 4); ctx.lineTo(W - 80, y + rowH - 4); ctx.stroke();
+  });
+
+  const fy = headH + list.length * rowH;
+  ctx.fillStyle = "#8e8a82";
+  ctx.font = "14px 'Helvetica Neue', Helvetica, sans-serif";
+  try{ ctx.letterSpacing = "6px"; }catch(e){}
+  ctx.fillText("SHIMA-SHIMA BY SIROP", 80, fy + 100);
+  try{ ctx.letterSpacing = "0px"; }catch(e){}
+  ctx.font = "12px 'Helvetica Neue', Helvetica, sans-serif";
+  ctx.fillText("sirop-d.github.io/shima-shima", 80, fy + 130);
+
+  if(typeof qrcode !== "undefined"){
+    try{
+      const arr = list.map(f => [f.model, f.sw, f.gw, f.pl, f.base, f.stripe, f.rating, f.name || 0]);
+      const q = qrcode(0, "M");
+      q.addData(pageUrl() + "#f=" + b64e(JSON.stringify(arr)));
+      q.make();
+      const n = q.getModuleCount();
+      const cell = Math.max(2, Math.floor(150 / n));
+      const qs = n * cell;
+      const qx = W - 80 - qs, qy = fy + 40;
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(qx - 10, qy - 10, qs + 20, qs + 20);
+      ctx.fillStyle = "#1c1b19";
+      for(let r = 0; r < n; r++){
+        for(let c = 0; c < n; c++){
+          if(q.isDark(r, c)) ctx.fillRect(qx + c * cell, qy + r * cell, cell, cell);
+        }
+      }
+    }catch(e){}
+  }
+
+  cv.toBlob(blob => {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "shima-shima_favorites.png";
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  });
+});
 
 function renderJournal(){
   const j = t().journal;
@@ -679,10 +1114,19 @@ function applyLang(){
   $("lbPl").textContent = d.pl;
   $("footnote").textContent = d.footnote;
   $("addFav").textContent = d.addFav;
+  $("todayBtn").textContent = d.today;
+  $("shareBtn").textContent = d.share;
+  $("shareBtn").dataset.label = d.share;
+  $("shareFavsBtn").textContent = d.shareFavs;
+  $("shareFavsBtn").dataset.label = d.shareFavs;
+  $("dlBtn").textContent = d.download;
+  $("importBtn").textContent = d.importFavs;
+  $("closeShared").textContent = d.close;
   buildModelSel();
   buildSortSel();
+  renderMyColors();
   $("modelNote").textContent = d.notes[currentModel.id];
-  $("modelName").textContent = d.models[currentModel.id];
+  $("modelName").textContent = captionOverride || d.models[currentModel.id];
   renderJournal();
   if(!$("viewFav").classList.contains("hidden")) renderFavs();
   try{ localStorage.setItem(KEY_LANG, lang); }catch(e){}
@@ -704,25 +1148,66 @@ function saveState(){
 function saveFavs(){
   try{ localStorage.setItem(KEY_FAVS, JSON.stringify(favs)); }catch(e){}
 }
+function saveMyColors(){
+  try{ localStorage.setItem(KEY_MYCOLORS, JSON.stringify(myColors)); }catch(e){}
+}
+
+function parseHash(){
+  const h = location.hash;
+  try{
+    if(h.startsWith("#d=")){
+      const [model, sw, gw, pl, base, stripe] = JSON.parse(b64d(h.slice(3)));
+      const m = MODELS.find(x => x.id === model) || MODELS[MODELS.length-1];
+      currentModel = m;
+      $("base").value = base; $("stripe").value = stripe;
+      $("sw").value = sw; $("gw").value = gw; $("pl").value = pl;
+      history.replaceState(null, "", pageUrl());
+      return "d";
+    }
+    if(h.startsWith("#f=")){
+      sharedFavs = JSON.parse(b64d(h.slice(3))).map((a, i) => ({
+        id: Date.now() + i, model: a[0], sw: a[1], gw: a[2], pl: a[3],
+        base: a[4], stripe: a[5], rating: a[6] || 0,
+        ...(a[7] ? {name: a[7]} : {})
+      }));
+      history.replaceState(null, "", pageUrl());
+      return "f";
+    }
+  }catch(e){}
+  return null;
+}
+
+window.addEventListener("hashchange", () => {
+  const mode = parseHash();
+  if(mode === "d"){ applyModel(currentModel, true); switchTab("sim"); }
+  else if(mode === "f"){ switchTab("fav"); }
+});
 
 function init(){
   try{ lang = localStorage.getItem(KEY_LANG) || "ja"; }catch(e){}
   if(!I18N[lang]) lang = "ja";
   $("langSel").value = lang;
   try{ favs = JSON.parse(localStorage.getItem(KEY_FAVS)) || []; }catch(e){ favs = []; }
-  let loaded = false;
-  try{
-    const d = JSON.parse(localStorage.getItem(KEY_STATE));
-    if(d){
-      currentModel = MODELS.find(x => x.id === d.model) || MODELS[0];
-      $("base").value = d.base; $("stripe").value = d.stripe;
-      $("sw").value = d.sw; $("gw").value = d.gw; $("pl").value = d.pl;
-      loaded = true;
-    }
-  }catch(e){}
+  favs.forEach((f, i) => { if(typeof f.order !== "number") f.order = i; });
+  try{ myColors = JSON.parse(localStorage.getItem(KEY_MYCOLORS)) || []; }catch(e){ myColors = []; }
+
+  const hashMode = parseHash();
+  let loaded = hashMode === "d";
+  if(!loaded){
+    try{
+      const d = JSON.parse(localStorage.getItem(KEY_STATE));
+      if(d){
+        currentModel = MODELS.find(x => x.id === d.model) || MODELS[0];
+        $("base").value = d.base; $("stripe").value = d.stripe;
+        $("sw").value = d.sw; $("gw").value = d.gw; $("pl").value = d.pl;
+        loaded = true;
+      }
+    }catch(e){}
+  }
   applyLang();
   if(loaded) applyModel(currentModel, true);
   else applyModel(MODELS[0]);
+  if(hashMode === "f") switchTab("fav");
 }
 init();
 </script>
