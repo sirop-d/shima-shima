@@ -12,12 +12,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <!--
   shima-shima — border tee simulator
-  @version v007
+  @version v008
   担当AI名: Antigravity / ラビ
   更新履歴（最新3件のみ）:
+  - v008 (20260611) ナバル風無地を77へ調整、6色指定マルチカラーボーダー（蜂マルチ風）追加
   - v007 (20260611) 言語表記JA→JP、共有/画像保存ボタンのシミュレーター集約、個別Tシャツポスター出力化
   - v006 (20260611) Journalを一次・公式資料中心へ減量改訂し、ROCOCO表示リンクを削除
-  - v005 (20260611) Journal以外のブランド実名表記を既存の符牒へ統一
 -->
 <style>
 :root{
@@ -237,8 +237,21 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
       <div class="dots" id="myColors"></div>
       <div class="pickers">
         <label id="lbBase" for="base"></label><input type="color" id="base" value="#F2EDE0">
-        <label id="lbStripe" for="stripe"></label><input type="color" id="stripe" value="#1F2A44">
-        <button id="swap"></button>
+        <span id="singleStripeCtrl" style="display:inline-flex; align-items:center; gap:14px;">
+          <label id="lbStripe" for="stripe"></label><input type="color" id="stripe" value="#1F2A44">
+          <button id="swap"></button>
+        </span>
+        <span id="multiStripeCtrl" class="hidden" style="display:inline-flex; align-items:center; gap:8px;">
+          <label id="lbMulti" style="font-size:11px; color:var(--gray); letter-spacing:.08em;"></label>
+          <span style="display:inline-flex; gap:8px;">
+            <input type="color" class="multi-color-input" data-index="0" value="#0A4AB3">
+            <input type="color" class="multi-color-input" data-index="1" value="#7A7A7A">
+            <input type="color" class="multi-color-input" data-index="2" value="#D32F2F">
+            <input type="color" class="multi-color-input" data-index="3" value="#5D9CEC">
+            <input type="color" class="multi-color-input" data-index="4" value="#1A2536">
+            <input type="color" class="multi-color-input" data-index="5" value="#8C7A6B">
+          </span>
+        </span>
       </div>
     </section>
 
@@ -288,7 +301,7 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
 <script>
-const VERSION = "ボーダーTシミュレーター_v007";
+const VERSION = "ボーダーTシミュレーター_v008";
 const KEY_STATE = "shima-shima_state";
 const KEY_FAVS = "shima-shima_favorites";
 const KEY_LANG = "shima-shima_lang";
@@ -297,9 +310,10 @@ const $ = id => document.getElementById(id);
 
 const MODELS = [
   {id:"sj-ouessant", sw:8, gw:8, pl:0, base:"#F2EDE0", stripe:"#1F2A44"},
-  {id:"sj-naval", sw:6, gw:12, pl:80, base:"#F5F1E6", stripe:"#1F2A44"},
+  {id:"sj-naval", sw:6, gw:12, pl:77, base:"#F5F1E6", stripe:"#1F2A44"},
   {id:"sj-morlaix", sw:4, gw:9, pl:0, base:"#F7F4EA", stripe:"#27324F"},
   {id:"bee-russell", sw:6, gw:13, pl:0, base:"#EFE9DA", stripe:"#27324F"},
+  {id:"bee-multi", sw:6, gw:12, pl:0, base:"#FFFFFF", stripes:["#0A4AB3","#7A7A7A","#D32F2F","#5D9CEC","#1A2536","#8C7A6B"]},
   {id:"mj", sw:9, gw:14, pl:0, base:"#FFFFFF", stripe:"#2B3A55"},
   {id:"uncl", sw:7, gw:12, pl:0, base:"#FFFFFF", stripe:"#233A5C"},
   {id:"original", sw:8, gw:10, pl:0, base:"#FFFFFF", stripe:"#C3A6DE"}
@@ -324,18 +338,19 @@ ja:{
   hModel:"model", hColor:"colorway", hStripe:"stripe",
   models:{
     "sj-ouessant":"SJウエッソン風", "sj-naval":"SJナバル風", "sj-morlaix":"SJモーレ風",
-    "bee-russell":"蜂 ラッセル風", "mj":"MJ風", "uncl":"UNCL風", "original":"オリジナル"
+    "bee-russell":"蜂 ラッセル風", "bee-multi":"蜂 マルチカラー風", "mj":"MJ風", "uncl":"UNCL風", "original":"オリジナル"
   },
   notes:{
     "sj-ouessant":"SJの定番。厚手・等ピッチ・全面ボーダー。",
     "sj-naval":"胸元が無地のタイプ。細めの縞が下半分に入る。",
     "sj-morlaix":"薄手・細ピッチ。春夏向けの軽い表情。",
     "bee-russell":"目の詰まった生地に細めの縞。間隔広めで上品。",
+    "bee-multi":"マルチカラーの等ピッチ縞。6色の遊び心ある配色。",
     "mj":"太番手の白地。日常着のすっきりしたボーダー。",
     "uncl":"標準的なピッチのクルーT系。気軽な普段着。",
     "original":"自由設定。スライダーと色で好きな1枚を。"
   },
-  base:"地色", stripe:"線色", swap:"入れ替え",
+  base:"地色", stripe:"線色", swap:"入れ替え", multi:"線色",
   sw:"線の太さ", gw:"地の間隔", pl:"胸元の無地",
   footnote:"プリセットは実在の名作を観察した「〜風」の再現です。特定ブランドの公式設定ではありません。",
   addFav:"＋ お気に入りに登録", added:"登録しました",
@@ -381,18 +396,19 @@ en:{
   hModel:"model", hColor:"colorway", hStripe:"stripe",
   models:{
     "sj-ouessant":"SJ Ouessant", "sj-naval":"SJ Naval", "sj-morlaix":"SJ Morlaix",
-    "bee-russell":"Bee Russell", "mj":"MJ", "uncl":"UNCL", "original":"Original"
+    "bee-russell":"Bee Russell", "bee-multi":"Bee Multi-color", "mj":"MJ", "uncl":"UNCL", "original":"Original"
   },
   notes:{
     "sj-ouessant":"The classic. Heavy jersey, even pitch, stripes all over.",
     "sj-naval":"Plain chest, finer stripes on the lower body.",
     "sj-morlaix":"Lightweight, fine pitch — for spring and summer.",
     "bee-russell":"Dense fabric, fine stripes, generous spacing.",
+    "bee-multi":"Multi-colored stripes of even pitch. A playful 6-color combination.",
     "mj":"Thick-yarn white ground. A clean everyday stripe.",
     "uncl":"Standard crew-tee pitch, easy to wear.",
     "original":"Free settings — find your own stripe."
   },
-  base:"ground", stripe:"stripe", swap:"swap",
+  base:"ground", stripe:"stripe", swap:"swap", multi:"stripes",
   sw:"stripe width", gw:"spacing", pl:"plain chest",
   footnote:"Presets are observations “in the style of” beloved classics — not official specifications of any brand.",
   addFav:"＋ save to favorites", added:"saved",
@@ -438,18 +454,19 @@ fr:{
   hModel:"modèle", hColor:"coloris", hStripe:"rayure",
   models:{
     "sj-ouessant":"SJ Ouessant", "sj-naval":"SJ Naval", "sj-morlaix":"SJ Morlaix",
-    "bee-russell":"Abeille Russell", "mj":"MJ", "uncl":"UNCL", "original":"Originale"
+    "bee-russell":"Abeille Russell", "bee-multi":"Abeille Multicolore", "mj":"MJ", "uncl":"UNCL", "original":"Originale"
   },
   notes:{
     "sj-ouessant":"Le grand classique. Jersey épais, rayures régulières sur tout le corps.",
     "sj-naval":"Poitrine unie, rayures fines sur le bas.",
     "sj-morlaix":"Léger, rayures fines — printemps-été.",
     "bee-russell":"Tissu serré, rayures fines, espacement généreux.",
+    "bee-multi":"Rayures multicolores à pas régulier. Une combinaison ludique de 6 coloris.",
     "mj":"Fond blanc en fil épais. Une rayure nette du quotidien.",
     "uncl":"Rayure standard de tee-shirt, facile à porter.",
     "original":"Réglages libres — trouvez votre propre rayure."
   },
-  base:"fond", stripe:"rayure", swap:"inverser",
+  base:"fond", stripe:"rayure", swap:"inverser", multi:"rayures",
   sw:"épaisseur", gw:"espacement", pl:"plastron uni",
   footnote:"Les préréglages sont des observations « dans l’esprit de » classiques aimés — aucune spécification officielle d’une marque.",
   addFav:"＋ ajouter aux favoris", added:"ajouté",
@@ -516,11 +533,38 @@ const pageUrl = () => location.href.split("#")[0];
 function render(){
   const b = $("base").value, s = $("stripe").value;
   const sw = +$("sw").value, gw = +$("gw").value, pl = +$("pl").value;
-  $("st").setAttribute("height", sw + gw);
-  $("pBase").setAttribute("height", sw + gw);
-  $("pBase").setAttribute("fill", b);
-  $("pStripe").setAttribute("height", sw);
-  $("pStripe").setAttribute("fill", s);
+  const isMulti = currentModel.id === "bee-multi";
+
+  $("singleStripeCtrl").classList.toggle("hidden", isMulti);
+  $("multiStripeCtrl").classList.toggle("hidden", !isMulti);
+  $("myColors").classList.toggle("hidden", isMulti);
+
+  if (isMulti) {
+    const inputs = document.querySelectorAll(".multi-color-input");
+    if (window.tempStripes && inputs.length === 6) {
+      inputs.forEach((input, idx) => {
+        input.value = window.tempStripes[idx] || "#000000";
+      });
+      delete window.tempStripes;
+    }
+    const colors = Array.from(inputs).map(input => input.value);
+    const totalH = (sw + gw) * 6;
+    $("st").setAttribute("height", totalH);
+    let patternHtml = `<rect id="pBase" width="10" height="${totalH}" fill="${b}"></rect>`;
+    for (let i = 0; i < 6; i++) {
+      const yPos = i * (sw + gw);
+      patternHtml += `<rect width="10" height="${sw}" y="${yPos}" fill="${colors[i]}"></rect>`;
+    }
+    $("st").innerHTML = patternHtml;
+  } else {
+    const totalH = sw + gw;
+    $("st").setAttribute("height", totalH);
+    $("st").innerHTML = `
+      <rect id="pBase" width="10" height="${totalH}" fill="${b}"></rect>
+      <rect id="pStripe" width="10" height="${sw}" fill="${s}"></rect>
+    `;
+  }
+
   $("plainRect").setAttribute("fill", b);
   $("plainRect").setAttribute("height", pl ? 60 + pl : 0);
   $("swOut").textContent = sw;
@@ -533,14 +577,28 @@ function render(){
 }
 
 function markPalette(){
-  const b = $("base").value.toUpperCase(), s = $("stripe").value.toUpperCase();
-  const mark = (sel, arr) => document.querySelectorAll(sel).forEach((btn, i) => {
-    const p = arr[i];
-    if(!p) return;
-    btn.classList.toggle("on", p.base.toUpperCase() === b && p.stripe.toUpperCase() === s);
-  });
-  mark("#palettes button", PALETTES);
-  mark("#myColors button:not(.addc)", myColors);
+  const b = $("base").value.toUpperCase();
+  const isMulti = currentModel.id === "bee-multi";
+
+  if (isMulti) {
+    const stripes = Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value.toUpperCase());
+    document.querySelectorAll("#palettes button").forEach((btn, i) => {
+      const p = MULTI_PALETTES[i];
+      if(!p) return;
+      const baseMatch = p.base.toUpperCase() === b;
+      const stripesMatch = p.stripes.every((color, idx) => color.toUpperCase() === stripes[idx]);
+      btn.classList.toggle("on", baseMatch && stripesMatch);
+    });
+  } else {
+    const s = $("stripe").value.toUpperCase();
+    const mark = (sel, arr) => document.querySelectorAll(sel).forEach((btn, i) => {
+      const p = arr[i];
+      if(!p) return;
+      btn.classList.toggle("on", p.base.toUpperCase() === b && p.stripe.toUpperCase() === s);
+    });
+    mark("#palettes button", PALETTES);
+    mark("#myColors button:not(.addc)", myColors);
+  }
 }
 
 function applyModel(m, keepValues){
@@ -548,10 +606,16 @@ function applyModel(m, keepValues){
   captionOverride = null;
   if(!keepValues){
     $("sw").value = m.sw; $("gw").value = m.gw; $("pl").value = m.pl;
-    $("base").value = m.base; $("stripe").value = m.stripe;
+    $("base").value = m.base;
+    if (m.id === "bee-multi" && m.stripes) {
+      window.tempStripes = m.stripes;
+    } else if (m.stripe) {
+      $("stripe").value = m.stripe;
+    }
   }
   $("modelSel").value = m.id;
   $("modelNote").textContent = t().notes[m.id];
+  renderPalettes();
   render();
 }
 
@@ -571,19 +635,54 @@ $("modelSel").addEventListener("change", e => {
   applyModel(MODELS.find(m => m.id === e.target.value));
 });
 
-const palBox = $("palettes");
-PALETTES.forEach(p => {
-  const btn = document.createElement("button");
-  btn.style.background = `linear-gradient(135deg, ${p.base} 50%, ${p.stripe} 50%)`;
-  btn.setAttribute("aria-label", `${p.base} / ${p.stripe}`);
-  btn.addEventListener("click", () => {
-    $("base").value = p.base;
-    $("stripe").value = p.stripe;
-    captionOverride = null;
-    render();
-  });
-  palBox.appendChild(btn);
-});
+const MULTI_PALETTES = [
+  {base:"#FFFFFF", stripes:["#0A4AB3","#7A7A7A","#D32F2F","#5D9CEC","#1A2536","#8C7A6B"]}, // image2
+  {base:"#FFFFFF", stripes:["#0A4AB3","#F7C81E","#E95D0F","#6B3B9C","#319B42","#0E6EAC"]}  // image3
+];
+
+function renderPalettes(){
+  const palBox = $("palettes");
+  palBox.innerHTML = "";
+  const isMulti = currentModel.id === "bee-multi";
+
+  if (isMulti) {
+    MULTI_PALETTES.forEach(p => {
+      const btn = document.createElement("button");
+      btn.style.background = `conic-gradient(
+        ${p.stripes[0]} 0 60deg, 
+        ${p.stripes[1]} 60deg 120deg, 
+        ${p.stripes[2]} 120deg 180deg, 
+        ${p.stripes[3]} 180deg 240deg, 
+        ${p.stripes[4]} 240deg 300deg, 
+        ${p.stripes[5]} 300deg 360deg
+      )`;
+      btn.setAttribute("aria-label", `Multi ${p.stripes.join(", ")}`);
+      btn.addEventListener("click", () => {
+        $("base").value = p.base;
+        const inputs = document.querySelectorAll(".multi-color-input");
+        inputs.forEach((input, idx) => {
+          input.value = p.stripes[idx] || "#000000";
+        });
+        captionOverride = null;
+        render();
+      });
+      palBox.appendChild(btn);
+    });
+  } else {
+    PALETTES.forEach(p => {
+      const btn = document.createElement("button");
+      btn.style.background = `linear-gradient(135deg, ${p.base} 50%, ${p.stripe} 50%)`;
+      btn.setAttribute("aria-label", `${p.base} / ${p.stripe}`);
+      btn.addEventListener("click", () => {
+        $("base").value = p.base;
+        $("stripe").value = p.stripe;
+        captionOverride = null;
+        render();
+      });
+      palBox.appendChild(btn);
+    });
+  }
+}
 
 function renderMyColors(){
   const box = $("myColors");
@@ -679,7 +778,17 @@ function copyText(url, btn){
 }
 
 $("shareBtn").addEventListener("click", () => {
-  const d = [currentModel.id, +$("sw").value, +$("gw").value, +$("pl").value, $("base").value, $("stripe").value];
+  const isMulti = currentModel.id === "bee-multi";
+  const stripes = isMulti ? Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value) : null;
+  const d = [
+    currentModel.id, 
+    +$("sw").value, 
+    +$("gw").value, 
+    +$("pl").value, 
+    $("base").value, 
+    isMulti ? stripes[0] : $("stripe").value,
+    ...(isMulti ? [stripes] : [])
+  ];
   copyText(pageUrl() + "#d=" + b64e(JSON.stringify(d)), $("shareBtn"));
 });
 
@@ -698,13 +807,17 @@ Object.keys(TABS).forEach(v => $(TABS[v]).addEventListener("click", () => switch
 
 $("addFav").addEventListener("click", () => {
   const maxOrder = favs.reduce((m, f) => Math.max(m, f.order ?? 0), -1);
+  const isMulti = currentModel.id === "bee-multi";
+  const stripes = isMulti ? Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value) : null;
   favs.push({
     id: Date.now(),
     model: currentModel.id,
-    base: $("base").value, stripe: $("stripe").value,
+    base: $("base").value,
+    stripe: isMulti ? stripes[0] : $("stripe").value,
     sw: +$("sw").value, gw: +$("gw").value, pl: +$("pl").value,
     rating: 0,
-    order: maxOrder + 1
+    order: maxOrder + 1,
+    ...(isMulti ? { stripes } : {})
   });
   saveFavs();
   const btn = $("addFav");
@@ -791,7 +904,25 @@ function favRow(f, opts){
 
   const sw = document.createElement("div");
   sw.className = "sw";
-  sw.style.background = `repeating-linear-gradient(180deg, ${f.stripe} 0 ${f.sw/2}px, ${f.base} ${f.sw/2}px ${(f.sw+f.gw)/2}px)`;
+  if (f.model === "bee-multi" && f.stripes) {
+    let stops = [];
+    const sh = f.sw / 2;
+    const gh = f.gw / 2;
+    const step = sh + gh;
+    for (let i = 0; i < 6; i++) {
+      const c = f.stripes[i] || "#000";
+      const startStripe = i * step;
+      const endStripe = startStripe + sh;
+      const startGap = endStripe;
+      const endGap = startGap + gh;
+      stops.push(`${c} ${startStripe}px ${endStripe}px`);
+      stops.push(`${f.base} ${startGap}px ${endGap}px`);
+    }
+    sw.style.background = `linear-gradient(180deg, ${stops.join(", ")})`;
+    sw.style.backgroundSize = `100% ${step * 6}px`;
+  } else {
+    sw.style.background = `repeating-linear-gradient(180deg, ${f.stripe} 0 ${f.sw/2}px, ${f.base} ${f.sw/2}px ${(f.sw+f.gw)/2}px)`;
+  }
   sw.addEventListener("click", () => loadFav(f));
 
   const info = document.createElement("div");
@@ -914,11 +1045,21 @@ function renderFavs(){
 function loadFav(f){
   const m = MODELS.find(x => x.id === f.model) || MODELS[MODELS.length-1];
   currentModel = m;
-  $("base").value = f.base; $("stripe").value = f.stripe;
+  $("base").value = f.base;
+  const isMulti = f.model === "bee-multi";
+  if (isMulti && f.stripes) {
+    const inputs = document.querySelectorAll(".multi-color-input");
+    inputs.forEach((input, idx) => {
+      input.value = f.stripes[idx] || "#000000";
+    });
+  } else {
+    $("stripe").value = f.stripe;
+  }
   $("sw").value = f.sw; $("gw").value = f.gw; $("pl").value = f.pl;
   $("modelSel").value = m.id;
   $("modelNote").textContent = t().notes[m.id];
   captionOverride = f.name || null;
+  renderPalettes();
   render();
   switchTab("sim");
 }
@@ -1028,8 +1169,9 @@ $("dlTeeBtn").addEventListener("click", () => {
     // Colors
     try { ctx.letterSpacing = "2px"; } catch(e) {}
     const bColor = $("base").value.toUpperCase();
-    const sColor = $("stripe").value.toUpperCase();
-    ctx.fillText(`${bColor} / ${sColor}`, 120, 1050);
+    const isMulti = currentModel.id === "bee-multi";
+    const colorText = isMulti ? `${bColor} / MULTI` : `${bColor} / ${$("stripe").value.toUpperCase()}`;
+    ctx.fillText(colorText, 120, 1050);
 
     // Site Credit
     ctx.fillStyle = "#b8b4aa";
@@ -1043,7 +1185,15 @@ $("dlTeeBtn").addEventListener("click", () => {
     // QR code
     if (typeof qrcode !== "undefined") {
       try {
-        const d = [currentModel.id, sw, gw, pl, $("base").value, $("stripe").value];
+        const isMulti = currentModel.id === "bee-multi";
+        const stripes = isMulti ? Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value) : null;
+        const d = [
+          currentModel.id, 
+          sw, gw, pl, 
+          $("base").value, 
+          isMulti ? stripes[0] : $("stripe").value,
+          ...(isMulti ? [stripes] : [])
+        ];
         const q = qrcode(0, "M");
         q.addData(pageUrl() + "#d=" + b64e(JSON.stringify(d)));
         q.make();
@@ -1147,9 +1297,12 @@ $("langSel").addEventListener("change", e => {
 
 function saveState(){
   try{
+    const isMulti = currentModel.id === "bee-multi";
+    const stripes = isMulti ? Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value) : null;
     localStorage.setItem(KEY_STATE, JSON.stringify({
       model: currentModel.id, base: $("base").value, stripe: $("stripe").value,
-      sw: $("sw").value, gw: $("gw").value, pl: $("pl").value
+      sw: $("sw").value, gw: $("gw").value, pl: $("pl").value,
+      ...(isMulti ? { stripes } : {})
     }));
   }catch(e){}
 }
@@ -1164,10 +1317,16 @@ function parseHash(){
   const h = location.hash;
   try{
     if(h.startsWith("#d=")){
-      const [model, sw, gw, pl, base, stripe] = JSON.parse(b64d(h.slice(3)));
+      const arr = JSON.parse(b64d(h.slice(3)));
+      const [model, sw, gw, pl, base, stripe, stripes] = arr;
       const m = MODELS.find(x => x.id === model) || MODELS[MODELS.length-1];
       currentModel = m;
-      $("base").value = base; $("stripe").value = stripe;
+      $("base").value = base;
+      if (model === "bee-multi" && stripes) {
+        window.tempStripes = stripes;
+      } else {
+        $("stripe").value = stripe;
+      }
       $("sw").value = sw; $("gw").value = gw; $("pl").value = pl;
       history.replaceState(null, "", pageUrl());
       return "d";
@@ -1199,6 +1358,14 @@ function init(){
   favs.forEach((f, i) => { if(typeof f.order !== "number") f.order = i; });
   try{ myColors = JSON.parse(localStorage.getItem(KEY_MYCOLORS)) || []; }catch(e){ myColors = []; }
 
+  // Set up listeners for multi-color inputs
+  document.querySelectorAll(".multi-color-input").forEach(input => {
+    input.addEventListener("input", () => {
+      captionOverride = null;
+      render();
+    });
+  });
+
   const hashMode = parseHash();
   let loaded = hashMode === "d";
   if(!loaded){
@@ -1206,7 +1373,12 @@ function init(){
       const d = JSON.parse(localStorage.getItem(KEY_STATE));
       if(d){
         currentModel = MODELS.find(x => x.id === d.model) || MODELS[0];
-        $("base").value = d.base; $("stripe").value = d.stripe;
+        $("base").value = d.base;
+        if (d.model === "bee-multi" && d.stripes) {
+          window.tempStripes = d.stripes;
+        } else {
+          $("stripe").value = d.stripe;
+        }
         $("sw").value = d.sw; $("gw").value = d.gw; $("pl").value = d.pl;
         loaded = true;
       }
