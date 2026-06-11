@@ -12,12 +12,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <!--
   shima-shima — border tee simulator
-  @version v013
+  @version v014
   担当AI名: Codex / コウ
   更新履歴（最新3件のみ）:
+  - v014 (20260612) 二段ヘッダー、JPN/ENG/FRA、極細設定アイコン、ABOUT sirop、全履歴へ展開できるdevelopment journalを追加
   - v013 (20260612) ライト・ダーク・システム設定を追加。ロゴの説明表示とsimulator導線、shima-shimaタブの説明強化、フッター版情報ダイアログを3言語対応
   - v012 (20260612) journalの右隣に「shima-shima」タブ新設（名前の由来・border/stripeの呼称ねじれ・サイト紹介、3言語）。VERSION定数の更新漏れ（v010のまま）を修正
-  - v011 (20260612) Journalに欧米波及セクション「across the sea」追加（3言語）、1920年代の記述をマーフィ夫妻込み伝聞形へ修正、timeline 1923/2012/2017追加、references更新
 -->
 <style>
 :root{
@@ -41,6 +41,9 @@ select{
   background-repeat:no-repeat; background-position:right center; padding-right:18px;
 }
 header{
+  border-bottom:1px solid var(--hairline);
+}
+.header-main{
   display:flex; align-items:baseline; justify-content:space-between;
   padding:34px 48px 30px; border-bottom:1px solid var(--hairline);
 }
@@ -51,8 +54,13 @@ header{
   transition:max-width .25s ease,opacity .2s ease;
 }
 .brand:hover .brand-hint,.brand:focus-visible .brand-hint{max-width:220px; opacity:1;}
-.hright{display:flex; align-items:baseline; gap:26px;}
-.settings{display:flex; align-items:baseline; gap:18px;}
+.settings-row{display:flex; justify-content:flex-end; padding:10px 48px 11px;}
+.settings{display:flex; align-items:center; gap:18px;}
+.setting-control{display:flex; align-items:center; gap:6px; color:var(--gray);}
+.setting-icon{
+  width:14px; height:14px; flex:none; fill:none; stroke:currentColor; stroke-width:1.25;
+  stroke-linecap:round; stroke-linejoin:round;
+}
 nav{display:flex; gap:26px;}
 nav button{
   font-size:11px; letter-spacing:.22em; color:var(--gray);
@@ -63,10 +71,9 @@ nav button.on{color:var(--ink); border-bottom-color:var(--ink);}
 main{max-width:1020px; margin:0 auto; padding:64px 48px 80px;}
 .sim{display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:72px; align-items:start;}
 @media (max-width:760px){
-  header{padding:24px 24px 20px; flex-wrap:wrap; gap:14px;}
-  .hright{width:100%; flex-wrap:wrap; gap:14px;}
-  nav{order:2; width:100%; overflow-x:auto; gap:20px;}
-  .settings{margin-left:auto;}
+  .header-main{padding:24px 24px 20px; flex-wrap:wrap; gap:18px;}
+  nav{width:100%; justify-content:flex-end; overflow-x:auto; gap:20px;}
+  .settings-row{padding:9px 24px 10px;}
   .brand-hint{display:none;}
   main{padding:40px 24px 64px;}
   .sim{grid-template-columns:1fr; gap:48px;}
@@ -187,6 +194,12 @@ article .tl .y{font-size:11px; letter-spacing:.1em; color:var(--gray); min-width
 article .tl .t{font-family:var(--serif); font-size:13.5px; line-height:2; flex:1;}
 article .src{font-size:11px; color:var(--faint); line-height:1.9;}
 article a{color:var(--gray);}
+.about-release{
+  font-family:var(--serif); font-size:14.5px; line-height:2.2; color:var(--gray);
+  border-bottom:1px solid var(--gray); padding-bottom:2px;
+}
+.about-release:hover,.about-release:focus-visible{color:var(--ink); border-bottom-color:var(--ink);}
+.about-profile{white-space:pre-line;}
 footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint); padding:48px 0 40px;}
 #footerBtn{color:var(--faint); letter-spacing:.3em; border-bottom:1px solid transparent; padding-bottom:3px;}
 #footerBtn:hover,#footerBtn:focus-visible{color:var(--ink); border-bottom-color:var(--ink);}
@@ -203,33 +216,49 @@ dialog::backdrop{background:var(--backdrop);}
 .release-list li{padding:16px 0; border-top:1px solid var(--hairline);}
 .release-list strong{display:block; font-size:10px; letter-spacing:.18em; color:var(--gray); font-weight:400; margin-bottom:5px;}
 .release-list span{display:block; font-family:var(--serif); font-size:13px; line-height:1.9;}
+.release-toggle{
+  display:block; margin:24px auto 0; font-size:10px; letter-spacing:.16em; color:var(--gray);
+  border-bottom:1px solid var(--gray); padding-bottom:2px;
+}
+.release-toggle:hover,.release-toggle:focus-visible{color:var(--ink); border-bottom-color:var(--ink);}
 .hidden{display:none !important;}
 </style>
 </head>
 <body>
 <header>
-  <button class="brand" id="brandBtn" type="button">
-    <span class="wordmark">shima-shima</span>
-    <span class="brand-hint" id="brandHint">ボーダーシャツシミュレーター</span>
-  </button>
-  <div class="hright">
+  <div class="header-main">
+    <button class="brand" id="brandBtn" type="button">
+      <span class="wordmark">shima-shima</span>
+      <span class="brand-hint" id="brandHint">ボーダーシャツシミュレーター</span>
+    </button>
     <nav>
       <button id="tabSim" class="on" data-view="sim">simulator</button>
       <button id="tabFav" data-view="fav">favorites</button>
       <button id="tabRead" data-view="jour">journal</button>
       <button id="tabAbout" data-view="about">shima-shima</button>
     </nav>
+  </div>
+  <div class="settings-row">
     <div class="settings">
-      <select id="langSel" aria-label="language">
-        <option value="ja">JP</option>
-        <option value="en">EN</option>
-        <option value="fr">FR</option>
-      </select>
-      <select id="themeSel" aria-label="theme">
-        <option value="light">light</option>
-        <option value="dark">dark</option>
-        <option value="system">system</option>
-      </select>
+      <label class="setting-control">
+        <svg class="setting-icon" aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3Z"></path>
+        </svg>
+        <select id="langSel" aria-label="language">
+          <option value="ja">JPN</option>
+          <option value="en">ENG</option>
+          <option value="fr">FRA</option>
+        </select>
+      </label>
+      <label class="setting-control">
+        <svg class="setting-icon" id="themeIcon" aria-hidden="true" viewBox="0 0 24 24"></svg>
+        <select id="themeSel" aria-label="theme">
+          <option value="light">light</option>
+          <option value="dark">dark</option>
+          <option value="system">system</option>
+        </select>
+      </label>
     </div>
   </div>
 </header>
@@ -352,11 +381,12 @@ dialog::backdrop{background:var(--backdrop);}
   </div>
   <p class="release-version" id="releaseVersion"></p>
   <ol class="release-list" id="releaseList"></ol>
+  <button class="release-toggle" id="releaseToggle" type="button" aria-controls="releaseList" aria-expanded="false"></button>
 </dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
 <script>
-const VERSION = "shima-shima_v013";
+const VERSION = "shima-shima_v014";
 const KEY_STATE = "shima-shima_state";
 const KEY_FAVS = "shima-shima_favorites";
 const KEY_LANG = "shima-shima_lang";
@@ -365,6 +395,11 @@ const KEY_THEME = "shima-shima_theme";
 const $ = id => document.getElementById(id);
 
 const RELEASES = [
+  {v:"v014", date:"2026.06.12", text:{
+    ja:"二段ヘッダー、JPN / ENG / FRA、グレースケール極細設定アイコン、ABOUT sirop、全履歴へ展開できるdevelopment journalを追加。",
+    en:"Added a two-row header, JPN / ENG / FRA labels, thin grayscale icons, ABOUT sirop, and a development journal expandable to the full history.",
+    fr:"Ajout d’un en-tête sur deux rangées, des labels JPN / ENG / FRA, d’icônes fines, de ABOUT sirop et d’un journal de développement extensible à tout l’historique."
+  }},
   {v:"v013", date:"2026.06.12", text:{
     ja:"ライト・ダーク・システム設定、ロゴのsimulator導線、サイト説明、版情報ダイアログを追加。",
     en:"Added light, dark, and system themes, logo navigation, clearer site identity, and a release dialog.",
@@ -379,6 +414,56 @@ const RELEASES = [
     ja:"Journalに欧米への波及、年表、参考資料を追加・更新。",
     en:"Expanded the journal with the stripe’s spread across the sea, timeline entries, and references.",
     fr:"Développement du journal avec la diffusion au-delà des mers, de nouveaux repères et des références."
+  }},
+  {v:"v010", date:"2026.06.11", text:{
+    ja:"Journalから特定アイコンを非表示化。",
+    en:"Removed a specific icon from the journal.",
+    fr:"Retrait d’une icône spécifique du journal."
+  }},
+  {v:"v009", date:"2026.06.11", text:{
+    ja:"Journalの歴史記述をファクトチェックし、3言語で更新。",
+    en:"Fact-checked and updated the journal’s history in three languages.",
+    fr:"Vérification factuelle et mise à jour de l’histoire du journal en trois langues."
+  }},
+  {v:"v008", date:"2026.06.11", text:{
+    ja:"6色マルチカラーボーダーと、色ごとの調整機能を追加。",
+    en:"Added six-color multi-stripes with individual color controls.",
+    fr:"Ajout de rayures multicolores à six couleurs avec réglages individuels."
+  }},
+  {v:"v007", date:"2026.06.11", text:{
+    ja:"共有・画像保存をsimulatorへ集約し、Tシャツポスター画像を刷新。",
+    en:"Moved sharing and image export into the simulator and refreshed the shirt poster.",
+    fr:"Regroupement du partage et de l’export dans le simulateur, avec une nouvelle affiche."
+  }},
+  {v:"v006", date:"2026.06.11", text:{
+    ja:"Journalを一次・公式資料中心へ整え、参考リンクを更新。",
+    en:"Refined the journal around primary and official sources and updated references.",
+    fr:"Révision du journal autour de sources primaires et officielles, avec références mises à jour."
+  }},
+  {v:"v005", date:"2026.06.11", text:{
+    ja:"SimulatorとREADMEのプリセット名・説明を、非公式な符牒表記へ統一。",
+    en:"Standardised simulator and README preset names with unofficial codenames.",
+    fr:"Harmonisation des noms de préréglages du simulateur et du README avec des codes non officiels."
+  }},
+  {v:"v004", date:"2026.06.11", text:{
+    ja:"手動並べ替え、リネーム、共有リンク、今日の一枚、マイカラー、画像保存を追加。",
+    en:"Added manual ordering, renaming, share links, today’s stripe, saved colors, and image export.",
+    fr:"Ajout du tri manuel, renommage, liens de partage, rayure du jour, couleurs sauvegardées et export."
+  }},
+  {v:"v003", date:"2026.06.11", text:{
+    ja:"お気に入り、3言語切替、モデル選択を追加。",
+    en:"Added favorites, three-language switching, and model selection.",
+    fr:"Ajout des favoris, du changement entre trois langues et du choix de modèle."
+  }},
+  {v:"v002", date:"2026.06.11", text:{
+    ja:"エディトリアル調のデザインと長袖シルエットへ刷新。",
+    en:"Redesigned the interface with an editorial look and a long-sleeve silhouette.",
+    fr:"Nouvelle interface éditoriale et silhouette à manches longues."
+  }},
+  {v:"v001", date:"2026.06.11", text:{
+    ja:"ボーダーシャツシミュレーターの初版を公開。",
+    en:"Published the first version of the border shirt simulator.",
+    fr:"Publication de la première version du simulateur de marinières."
   }}
 ];
 
@@ -438,8 +523,10 @@ ja:{
   sharedTitle:"共有されたお気に入り", importFavs:"自分のfavoritesに取り込む", close:"閉じる",
   posterTitle:"わたしの好きな shima-shima",
   brandHint:"ボーダーシャツシミュレーター",
-  themes:["ライト","ダーク","システム設定"],
+  themes:["ライト","ダーク","システム"],
   releaseTitle:"バージョンと更新履歴", releaseVersion:"現在のバージョン",
+  releaseLink:"バージョンと更新履歴",
+  releaseAll:"すべての更新履歴を見る", releaseLatest:"最新5件へ戻る",
   journal:{
     lede:"ボーダーTは、ただの柄ではなく、海で働く人の背中から暮らしの定番へと歩いてきた「線の服」。その来歴を、歩く速度で。",
     sections:[
@@ -488,8 +575,10 @@ ja:{
         "つまり「ボーダーT」は、海をわたると striped tee。呼び名のねじれもふくめて、縞をたのしむのがこのサイトです。"
       ]},
       {h:"about this site", ps:[
-        "simulatorで自分の縞をつくり、journalで線の服の来歴を歩く。プリセットは愛される定番を観察した「〜風」の再解釈で、特定ブランドの公式設定ではありません。",
-        "shima-shima by sirop"
+        "simulatorで自分の縞をつくり、journalで線の服の来歴を歩く。プリセットは愛される定番を観察した「〜風」の再解釈で、特定ブランドの公式設定ではありません。"
+      ]},
+      {h:"ABOUT sirop", ps:[
+        "🍀 気になることはとにかくやってみないと始まらない！\n🍋 AIを回遊してオールジャンルを楽しみたい\n🍊 デジタルとアナログどっちも好き\n❤️ 目の前のモノゴトジカンを楽しむこと\n🌟 ことば・自転車・お散歩・写真・カメラ・カフェ・ポップス・シティポップ・Deep House・渋谷系\nいろいろ知りたいな 🕊"
       ]}
     ]
   }
@@ -527,6 +616,8 @@ en:{
   brandHint:"border shirt simulator",
   themes:["light","dark","system"],
   releaseTitle:"version & updates", releaseVersion:"current version",
+  releaseLink:"version & updates",
+  releaseAll:"view all updates", releaseLatest:"back to latest five",
   journal:{
     lede:"The breton stripe is more than a pattern — a garment of lines that walked from sailors’ backs into everyday wardrobes. Its story, at walking pace.",
     sections:[
@@ -575,8 +666,10 @@ en:{
         "So a Japanese “border tee” becomes, across the sea, a striped tee. This site enjoys stripes — twisted names and all."
       ]},
       {h:"about this site", ps:[
-        "Make your own stripe in the simulator; walk the history of the garment in the journal. Presets are observations “in the style of” beloved classics — not official specifications of any brand.",
-        "shima-shima by sirop"
+        "Make your own stripe in the simulator; walk the history of the garment in the journal. Presets are observations “in the style of” beloved classics — not official specifications of any brand."
+      ]},
+      {h:"ABOUT sirop", ps:[
+        "🍀 Nothing begins until I try whatever catches my curiosity.\n🍋 I want to wander among AIs and enjoy every kind of subject.\n🍊 I love both digital and analogue things.\n❤️ I enjoy the things, moments, and time right in front of me.\n🌟 Words, bicycles, walks, photography, cameras, cafés, pop, city pop, Deep House, and Shibuya-kei.\nThere is always more I want to discover. 🕊"
       ]}
     ]
   }
@@ -614,6 +707,8 @@ fr:{
   brandHint:"simulateur de marinières",
   themes:["clair","sombre","système"],
   releaseTitle:"version et mises à jour", releaseVersion:"version actuelle",
+  releaseLink:"version et mises à jour",
+  releaseAll:"voir toutes les mises à jour", releaseLatest:"revenir aux cinq dernières",
   journal:{
     lede:"La marinière est plus qu’un motif — un vêtement de lignes, passé du dos des marins aux garde-robes de tous les jours. Son histoire, au pas de promenade.",
     sections:[
@@ -662,8 +757,10 @@ fr:{
         "Ainsi, un « border tee » japonais devient, au-delà des mers, un striped tee — une marinière. Ce site aime les rayures, noms de travers compris."
       ]},
       {h:"à propos", ps:[
-        "Composez votre rayure dans le simulateur ; parcourez l’histoire du vêtement dans le journal. Les préréglages sont des observations « dans l’esprit de » classiques aimés — aucune spécification officielle d’une marque.",
-        "shima-shima by sirop"
+        "Composez votre rayure dans le simulateur ; parcourez l’histoire du vêtement dans le journal. Les préréglages sont des observations « dans l’esprit de » classiques aimés — aucune spécification officielle d’une marque."
+      ]},
+      {h:"ABOUT sirop", ps:[
+        "🍀 Rien ne commence avant d’essayer ce qui éveille ma curiosité.\n🍋 J’aime voyager d’une IA à l’autre et explorer tous les genres.\n🍊 J’aime autant le numérique que l’analogique.\n❤️ J’aime profiter des choses, des instants et du temps devant moi.\n🌟 Les mots, le vélo, les promenades, la photographie, les appareils photo, les cafés, la pop, la city pop, la Deep House et le Shibuya-kei.\nIl y a toujours tant de choses que j’aimerais découvrir. 🕊"
       ]}
     ]
   }
@@ -679,6 +776,7 @@ let sharedFavs = null;
 let captionOverride = null;
 let dragId = null;
 let theme = "system";
+let releaseExpanded = false;
 
 function t(){ return I18N[lang]; }
 const collator = new Intl.Collator(["ja"], {numeric:true, sensitivity:"base"});
@@ -689,6 +787,16 @@ function applyTheme(){
   const resolved = theme === "system" ? (systemTheme.matches ? "dark" : "light") : theme;
   document.documentElement.dataset.theme = resolved;
   document.documentElement.style.colorScheme = resolved;
+  renderThemeIcon();
+}
+
+function renderThemeIcon(){
+  const paths = {
+    light:'<circle cx="12" cy="12" r="3.5"></circle><path d="M12 2.5v2M12 19.5v2M4.5 4.5l1.4 1.4M18.1 18.1l1.4 1.4M2.5 12h2M19.5 12h2M4.5 19.5l1.4-1.4M18.1 5.9l1.4-1.4"></path>',
+    dark:'<path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.7 8.7 0 1 0 20.5 15.2Z"></path>',
+    system:'<circle cx="12" cy="12" r="8.5"></circle><path d="M12 3.5a8.5 8.5 0 0 1 0 17Z"></path>'
+  };
+  $("themeIcon").innerHTML = paths[theme];
 }
 
 function buildThemeSel(){
@@ -1436,21 +1544,28 @@ function renderJournal(){
 function renderAbout(){
   const a = t().about;
   let html = `<p class="lede">${a.lede}</p>`;
-  a.sections.forEach(sec => {
+  a.sections.forEach((sec, i) => {
     html += `<h2>${sec.h}</h2>`;
-    sec.ps.forEach(p => { html += `<p>${p}</p>`; });
+    sec.ps.forEach(p => { html += `<p${i === a.sections.length - 1 ? ' class="about-profile"' : ""}>${p}</p>`; });
+    if(i === a.sections.length - 2){
+      html += `<button class="about-release" id="aboutReleaseBtn" type="button">shima-shima by sirop — ${t().releaseLink}</button>`;
+    }
   });
   $("about").innerHTML = html;
+  $("aboutReleaseBtn").addEventListener("click", openReleaseDialog);
 }
 
 function renderRelease(){
   const d = t();
+  const releases = releaseExpanded ? RELEASES : RELEASES.slice(0, 5);
   $("releaseTitle").textContent = d.releaseTitle;
   $("releaseVersion").textContent = `${d.releaseVersion}: ${VERSION}`;
   $("releaseClose").setAttribute("aria-label", d.close);
-  $("releaseList").innerHTML = RELEASES.map(item =>
+  $("releaseList").innerHTML = releases.map(item =>
     `<li><strong>${item.v} · ${item.date}</strong><span>${item.text[lang]}</span></li>`
   ).join("");
+  $("releaseToggle").textContent = releaseExpanded ? d.releaseLatest : d.releaseAll;
+  $("releaseToggle").setAttribute("aria-expanded", String(releaseExpanded));
 }
 
 function applyLang(){
@@ -1506,9 +1621,16 @@ systemTheme.addEventListener("change", () => {
   if(theme === "system") applyTheme();
 });
 
-$("footerBtn").addEventListener("click", () => {
+function openReleaseDialog(){
+  releaseExpanded = false;
   renderRelease();
   $("releaseDialog").showModal();
+}
+
+$("footerBtn").addEventListener("click", openReleaseDialog);
+$("releaseToggle").addEventListener("click", () => {
+  releaseExpanded = !releaseExpanded;
+  renderRelease();
 });
 $("releaseClose").addEventListener("click", () => $("releaseDialog").close());
 $("releaseDialog").addEventListener("click", e => {

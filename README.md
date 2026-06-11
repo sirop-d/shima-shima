@@ -39,8 +39,11 @@ SJウエッソン風、SJナバル風、SJモーレ風、蜂 ラッセル風、M
 - QRコードつきお気に入りポスター画像保存
 - 日本語・英語・フランス語切替
 - ライト・ダーク・システム設定に合わせた表示テーマ
+- 言語・表示テーマを見つけやすくするグレースケール極細アイコン
 - ボーダーシャツ文化についての読みものページ
 - `shima-shima` の名前とサイトについての紹介ページ
+- `ABOUT sirop` とサイト内のバージョン・更新履歴表示
+- 最新5件から全履歴へ展開できる development journal
 
 ### プリセット
 
@@ -98,8 +101,11 @@ By observing the atmosphere of iconic shirts and beloved brands, you can adjust 
 - Favorites poster image export with QR code
 - Japanese, English, and French interface
 - Light, dark, and system appearance themes
+- Thin grayscale icons for language and appearance settings
 - Reading page about border shirt culture
 - About page introducing the name and purpose of `shima-shima`
+- `ABOUT sirop` and an in-page version and update history
+- Development journal expandable from the latest five updates to the full history
 
 ### Presets
 
@@ -157,8 +163,11 @@ En observant l’atmosphère de modèles iconiques et de marques appréciées, o
 - Export d’une affiche de favoris avec QR code
 - Interface en japonais, anglais et français
 - Thèmes clair, sombre et système
+- Icônes fines en niveaux de gris pour les réglages de langue et d’apparence
 - Page de lecture sur la culture des marinières et des vêtements à rayures
 - Page de présentation du nom et du projet `shima-shima`
+- `ABOUT sirop` et historique des versions accessible dans le site
+- Journal de développement extensible des cinq dernières mises à jour à l’historique complet
 
 ### Préréglages
 
