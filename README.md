@@ -38,7 +38,9 @@ SJウエッソン風、SJナバル風、SJモーレ風、蜂 ラッセル風、M
 - 1枚またはお気に入り一覧の共有リンク
 - QRコードつきお気に入りポスター画像保存
 - 日本語・英語・フランス語切替
+- ライト・ダーク・システム設定に合わせた表示テーマ
 - ボーダーシャツ文化についての読みものページ
+- `shima-shima` の名前とサイトについての紹介ページ
 
 ### プリセット
 
@@ -95,7 +97,9 @@ By observing the atmosphere of iconic shirts and beloved brands, you can adjust 
 - Share links for one stripe or a favorites collection
 - Favorites poster image export with QR code
 - Japanese, English, and French interface
+- Light, dark, and system appearance themes
 - Reading page about border shirt culture
+- About page introducing the name and purpose of `shima-shima`
 
 ### Presets
 
@@ -152,7 +156,9 @@ En observant l’atmosphère de modèles iconiques et de marques appréciées, o
 - Liens de partage pour une rayure ou une collection de favoris
 - Export d’une affiche de favoris avec QR code
 - Interface en japonais, anglais et français
+- Thèmes clair, sombre et système
 - Page de lecture sur la culture des marinières et des vêtements à rayures
+- Page de présentation du nom et du projet `shima-shima`
 
 ### Préréglages
 

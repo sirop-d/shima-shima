@@ -12,22 +12,27 @@
 <meta name="twitter:card" content="summary_large_image">
 <!--
   shima-shima — border tee simulator
-  @version v012
-  担当AI名: Claude / クー
+  @version v013
+  担当AI名: Codex / コウ
   更新履歴（最新3件のみ）:
+  - v013 (20260612) ライト・ダーク・システム設定を追加。ロゴの説明表示とsimulator導線、shima-shimaタブの説明強化、フッター版情報ダイアログを3言語対応
   - v012 (20260612) journalの右隣に「shima-shima」タブ新設（名前の由来・border/stripeの呼称ねじれ・サイト紹介、3言語）。VERSION定数の更新漏れ（v010のまま）を修正
   - v011 (20260612) Journalに欧米波及セクション「across the sea」追加（3言語）、1920年代の記述をマーフィ夫妻込み伝聞形へ修正、timeline 1923/2012/2017追加、references更新
-  - v010 (20260611) Journalから楳図かずお氏アイコンを非表示化（デザイン要望）
 -->
 <style>
 :root{
   --bg:#faf9f6; --ink:#1c1b19; --gray:#8e8a82; --faint:#b8b4aa; --hairline:#e3e0d8;
+  --panel:#f3f1eb; --backdrop:rgba(28,27,25,.32);
   --serif:"Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
   --sans:"Helvetica Neue",Helvetica,"Hiragino Sans",Arial,sans-serif;
 }
+[data-theme="dark"]{
+  --bg:#171715; --ink:#f1efe9; --gray:#aaa69d; --faint:#77736c; --hairline:#393733;
+  --panel:#22211e; --backdrop:rgba(0,0,0,.62);
+}
 *{box-sizing:border-box; margin:0; padding:0;}
 html{background:var(--bg);}
-body{font-family:var(--sans); color:var(--ink); line-height:1.8; -webkit-font-smoothing:antialiased;}
+body{font-family:var(--sans); color:var(--ink); background:var(--bg); line-height:1.8; -webkit-font-smoothing:antialiased; transition:background-color .2s,color .2s;}
 button{background:none; border:none; cursor:pointer; font:inherit; color:inherit; padding:0;}
 select{
   appearance:none; -webkit-appearance:none; border:none; background:transparent;
@@ -39,19 +44,30 @@ header{
   display:flex; align-items:baseline; justify-content:space-between;
   padding:34px 48px 30px; border-bottom:1px solid var(--hairline);
 }
+.brand{display:flex; align-items:baseline; gap:12px; text-align:left; white-space:nowrap;}
 .wordmark{font-size:13px; letter-spacing:.38em; font-weight:400;}
-.hright{display:flex; align-items:baseline; gap:30px;}
+.brand-hint{
+  max-width:0; overflow:hidden; opacity:0; color:var(--gray); font-size:10px; letter-spacing:.12em;
+  transition:max-width .25s ease,opacity .2s ease;
+}
+.brand:hover .brand-hint,.brand:focus-visible .brand-hint{max-width:220px; opacity:1;}
+.hright{display:flex; align-items:baseline; gap:26px;}
+.settings{display:flex; align-items:baseline; gap:18px;}
 nav{display:flex; gap:26px;}
 nav button{
   font-size:11px; letter-spacing:.22em; color:var(--gray);
   padding-bottom:3px; border-bottom:1px solid transparent;
 }
 nav button.on{color:var(--ink); border-bottom-color:var(--ink);}
-#langSel{font-size:10px; letter-spacing:.2em; color:var(--gray);}
+#langSel,#themeSel{font-size:10px; letter-spacing:.16em; color:var(--gray);}
 main{max-width:1020px; margin:0 auto; padding:64px 48px 80px;}
 .sim{display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:72px; align-items:start;}
 @media (max-width:760px){
   header{padding:24px 24px 20px; flex-wrap:wrap; gap:14px;}
+  .hright{width:100%; flex-wrap:wrap; gap:14px;}
+  nav{order:2; width:100%; overflow-x:auto; gap:20px;}
+  .settings{margin-left:auto;}
+  .brand-hint{display:none;}
   main{padding:40px 24px 64px;}
   .sim{grid-template-columns:1fr; gap:48px;}
 }
@@ -172,12 +188,30 @@ article .tl .t{font-family:var(--serif); font-size:13.5px; line-height:2; flex:1
 article .src{font-size:11px; color:var(--faint); line-height:1.9;}
 article a{color:var(--gray);}
 footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint); padding:48px 0 40px;}
+#footerBtn{color:var(--faint); letter-spacing:.3em; border-bottom:1px solid transparent; padding-bottom:3px;}
+#footerBtn:hover,#footerBtn:focus-visible{color:var(--ink); border-bottom-color:var(--ink);}
+dialog{
+  width:min(520px,calc(100% - 40px)); max-height:calc(100% - 40px); overflow:auto;
+  margin:auto; padding:34px; border:1px solid var(--hairline); background:var(--panel); color:var(--ink);
+}
+dialog::backdrop{background:var(--backdrop);}
+.release-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; border-bottom:1px solid var(--hairline); padding-bottom:18px;}
+.release-head h2{font-size:12px; font-weight:400; letter-spacing:.24em;}
+.release-head button{font-size:18px; color:var(--gray);}
+.release-version{font-family:var(--serif); font-size:18px; margin:26px 0 20px;}
+.release-list{list-style:none;}
+.release-list li{padding:16px 0; border-top:1px solid var(--hairline);}
+.release-list strong{display:block; font-size:10px; letter-spacing:.18em; color:var(--gray); font-weight:400; margin-bottom:5px;}
+.release-list span{display:block; font-family:var(--serif); font-size:13px; line-height:1.9;}
 .hidden{display:none !important;}
 </style>
 </head>
 <body>
 <header>
-  <p class="wordmark">shima-shima</p>
+  <button class="brand" id="brandBtn" type="button">
+    <span class="wordmark">shima-shima</span>
+    <span class="brand-hint" id="brandHint">ボーダーシャツシミュレーター</span>
+  </button>
   <div class="hright">
     <nav>
       <button id="tabSim" class="on" data-view="sim">simulator</button>
@@ -185,11 +219,18 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
       <button id="tabRead" data-view="jour">journal</button>
       <button id="tabAbout" data-view="about">shima-shima</button>
     </nav>
-    <select id="langSel" aria-label="language">
-      <option value="ja">JP</option>
-      <option value="en">EN</option>
-      <option value="fr">FR</option>
-    </select>
+    <div class="settings">
+      <select id="langSel" aria-label="language">
+        <option value="ja">JP</option>
+        <option value="en">EN</option>
+        <option value="fr">FR</option>
+      </select>
+      <select id="themeSel" aria-label="theme">
+        <option value="light">light</option>
+        <option value="dark">dark</option>
+        <option value="system">system</option>
+      </select>
+    </div>
   </div>
 </header>
 
@@ -302,16 +343,44 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
 </section>
 </main>
 
-<footer>shima-shima by sirop</footer>
+<footer><button id="footerBtn" type="button">shima-shima by sirop</button></footer>
+
+<dialog id="releaseDialog">
+  <div class="release-head">
+    <h2 id="releaseTitle">shima-shima</h2>
+    <button id="releaseClose" type="button" aria-label="close">×</button>
+  </div>
+  <p class="release-version" id="releaseVersion"></p>
+  <ol class="release-list" id="releaseList"></ol>
+</dialog>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
 <script>
-const VERSION = "ボーダーTシミュレーター_v012";
+const VERSION = "shima-shima_v013";
 const KEY_STATE = "shima-shima_state";
 const KEY_FAVS = "shima-shima_favorites";
 const KEY_LANG = "shima-shima_lang";
 const KEY_MYCOLORS = "shima-shima_mycolors";
+const KEY_THEME = "shima-shima_theme";
 const $ = id => document.getElementById(id);
+
+const RELEASES = [
+  {v:"v013", date:"2026.06.12", text:{
+    ja:"ライト・ダーク・システム設定、ロゴのsimulator導線、サイト説明、版情報ダイアログを追加。",
+    en:"Added light, dark, and system themes, logo navigation, clearer site identity, and a release dialog.",
+    fr:"Ajout des thèmes clair, sombre et système, de la navigation par le logo, d’une présentation plus claire et du dialogue des versions."
+  }},
+  {v:"v012", date:"2026.06.12", text:{
+    ja:"「shima-shima」タブを新設し、名前の由来とborder / stripeの呼称を3言語で紹介。",
+    en:"Added the shima-shima tab, explaining the name and the border / stripe naming twist in three languages.",
+    fr:"Ajout de l’onglet shima-shima, présentant le nom et le décalage border / stripe en trois langues."
+  }},
+  {v:"v011", date:"2026.06.12", text:{
+    ja:"Journalに欧米への波及、年表、参考資料を追加・更新。",
+    en:"Expanded the journal with the stripe’s spread across the sea, timeline entries, and references.",
+    fr:"Développement du journal avec la diffusion au-delà des mers, de nouveaux repères et des références."
+  }}
+];
 
 const MODELS = [
   {id:"sj-ouessant", sw:8, gw:8, pl:0, base:"#F2EDE0", stripe:"#1F2A44"},
@@ -368,6 +437,9 @@ ja:{
   myColorAdd:"いまの配色をマイカラーに登録", myColorTip:"クリックで適用 / ダブルクリックで削除",
   sharedTitle:"共有されたお気に入り", importFavs:"自分のfavoritesに取り込む", close:"閉じる",
   posterTitle:"わたしの好きな shima-shima",
+  brandHint:"ボーダーシャツシミュレーター",
+  themes:["ライト","ダーク","システム設定"],
+  releaseTitle:"バージョンと更新履歴", releaseVersion:"現在のバージョン",
   journal:{
     lede:"ボーダーTは、ただの柄ではなく、海で働く人の背中から暮らしの定番へと歩いてきた「線の服」。その来歴を、歩く速度で。",
     sections:[
@@ -406,7 +478,7 @@ ja:{
     refs:'複数の公式・一次資料および解説資料を参照し、確認の弱い起源説や逸話は減らして構成しています。<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a> · <a href="https://en.wikipedia.org/wiki/Marini%C3%A8re" target="_blank" rel="noopener noreferrer">Marinière — Wikipedia</a>'
   },
   about:{
-    lede:"「shima-shima」という名前のこと、そしてこのサイトの小さな自己紹介。",
+    lede:"shima-shimaは、ボーダーシャツの縞・余白・配色を自由に試せるボーダーシャツシミュレーターです。「shima-shima」という名前のこと、そしてこのサイトの小さな自己紹介。",
     sections:[
       {h:"the name — しましま", ps:[
         "日本語では、縞模様のことを愛着をこめて「しましま」と呼びます。線がくり返すように、音もくり返す。このサイトの名前は、その日本語の響きをそのままローマ字にしたものです。"
@@ -452,6 +524,9 @@ en:{
   myColorAdd:"save current colors", myColorTip:"click to apply / double-click to remove",
   sharedTitle:"shared favorites", importFavs:"add to my favorites", close:"close",
   posterTitle:"my favorite shima-shima",
+  brandHint:"border shirt simulator",
+  themes:["light","dark","system"],
+  releaseTitle:"version & updates", releaseVersion:"current version",
   journal:{
     lede:"The breton stripe is more than a pattern — a garment of lines that walked from sailors’ backs into everyday wardrobes. Its story, at walking pace.",
     sections:[
@@ -490,7 +565,7 @@ en:{
     refs:'Built from multiple official and public sources, with weakly supported origin stories and anecdotes deliberately reduced.<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a> · <a href="https://en.wikipedia.org/wiki/Marini%C3%A8re" target="_blank" rel="noopener noreferrer">Marinière — Wikipedia</a>'
   },
   about:{
-    lede:"About the name “shima-shima,” and a small introduction to this site.",
+    lede:"shima-shima is a border shirt simulator for exploring stripes, spacing, and color combinations. About the name “shima-shima,” and a small introduction to this site.",
     sections:[
       {h:"the name", ps:[
         "In Japanese, stripes are affectionately called “shima-shima” — the word repeats, just as the lines do. This site simply borrows that sound, romanised, as its name."
@@ -536,6 +611,9 @@ fr:{
   myColorAdd:"garder ces couleurs", myColorTip:"clic pour appliquer / double-clic pour retirer",
   sharedTitle:"favoris partagés", importFavs:"ajouter à mes favoris", close:"fermer",
   posterTitle:"mon shima-shima préféré",
+  brandHint:"simulateur de marinières",
+  themes:["clair","sombre","système"],
+  releaseTitle:"version et mises à jour", releaseVersion:"version actuelle",
   journal:{
     lede:"La marinière est plus qu’un motif — un vêtement de lignes, passé du dos des marins aux garde-robes de tous les jours. Son histoire, au pas de promenade.",
     sections:[
@@ -574,7 +652,7 @@ fr:{
     refs:'Construit à partir de plusieurs sources officielles et publiques, en réduisant volontairement les récits d’origine et anecdotes peu étayés.<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a> · <a href="https://en.wikipedia.org/wiki/Marini%C3%A8re" target="_blank" rel="noopener noreferrer">Marinière — Wikipedia</a>'
   },
   about:{
-    lede:"Le nom « shima-shima », et une petite présentation de ce site.",
+    lede:"shima-shima est un simulateur de marinières pour explorer rayures, espacements et couleurs. Le nom « shima-shima », et une petite présentation de ce site.",
     sections:[
       {h:"le nom", ps:[
         "En japonais, les rayures se disent affectueusement « shima-shima » — le mot se répète, comme les lignes. Ce site emprunte simplement ce son, romanisé, pour son nom."
@@ -600,10 +678,25 @@ let sortMode = 0;
 let sharedFavs = null;
 let captionOverride = null;
 let dragId = null;
+let theme = "system";
 
 function t(){ return I18N[lang]; }
 const collator = new Intl.Collator(["ja"], {numeric:true, sensitivity:"base"});
 const dispName = f => f.name || t().models[f.model] || f.model;
+const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+function applyTheme(){
+  const resolved = theme === "system" ? (systemTheme.matches ? "dark" : "light") : theme;
+  document.documentElement.dataset.theme = resolved;
+  document.documentElement.style.colorScheme = resolved;
+}
+
+function buildThemeSel(){
+  const sel = $("themeSel");
+  const labels = t().themes;
+  Array.from(sel.options).forEach((option, i) => { option.textContent = labels[i]; });
+  sel.value = theme;
+}
 
 const b64e = s => btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
 const b64d = s => {
@@ -887,6 +980,7 @@ function switchTab(view){
   if(view === "fav") renderFavs();
 }
 Object.keys(TABS).forEach(v => $(TABS[v]).addEventListener("click", () => switchTab(v)));
+$("brandBtn").addEventListener("click", () => switchTab("sim"));
 
 $("addFav").addEventListener("click", () => {
   const maxOrder = favs.reduce((m, f) => Math.max(m, f.order ?? 0), -1);
@@ -1349,6 +1443,16 @@ function renderAbout(){
   $("about").innerHTML = html;
 }
 
+function renderRelease(){
+  const d = t();
+  $("releaseTitle").textContent = d.releaseTitle;
+  $("releaseVersion").textContent = `${d.releaseVersion}: ${VERSION}`;
+  $("releaseClose").setAttribute("aria-label", d.close);
+  $("releaseList").innerHTML = RELEASES.map(item =>
+    `<li><strong>${item.v} · ${item.date}</strong><span>${item.text[lang]}</span></li>`
+  ).join("");
+}
+
 function applyLang(){
   document.documentElement.lang = lang;
   const d = t();
@@ -1356,6 +1460,7 @@ function applyLang(){
   $("tabFav").textContent = d.nav[1];
   $("tabRead").textContent = d.nav[2];
   $("tabAbout").textContent = d.nav[3];
+  $("brandHint").textContent = d.brandHint;
   $("hModel").textContent = d.hModel;
   $("hColor").textContent = d.hColor;
   $("hStripe").textContent = d.hStripe;
@@ -1376,11 +1481,13 @@ function applyLang(){
   $("closeShared").textContent = d.close;
   buildModelSel();
   buildSortSel();
+  buildThemeSel();
   renderMyColors();
   $("modelNote").textContent = d.notes[currentModel.id];
   $("modelName").textContent = captionOverride || d.models[currentModel.id];
   renderJournal();
   renderAbout();
+  renderRelease();
   if(!$("viewFav").classList.contains("hidden")) renderFavs();
   try{ localStorage.setItem(KEY_LANG, lang); }catch(e){}
 }
@@ -1388,6 +1495,24 @@ function applyLang(){
 $("langSel").addEventListener("change", e => {
   lang = e.target.value;
   applyLang();
+});
+
+$("themeSel").addEventListener("change", e => {
+  theme = e.target.value;
+  applyTheme();
+  try{ localStorage.setItem(KEY_THEME, theme); }catch(e){}
+});
+systemTheme.addEventListener("change", () => {
+  if(theme === "system") applyTheme();
+});
+
+$("footerBtn").addEventListener("click", () => {
+  renderRelease();
+  $("releaseDialog").showModal();
+});
+$("releaseClose").addEventListener("click", () => $("releaseDialog").close());
+$("releaseDialog").addEventListener("click", e => {
+  if(e.target === $("releaseDialog")) $("releaseDialog").close();
 });
 
 function saveState(){
@@ -1449,6 +1574,9 @@ function init(){
   try{ lang = localStorage.getItem(KEY_LANG) || "ja"; }catch(e){}
   if(!I18N[lang]) lang = "ja";
   $("langSel").value = lang;
+  try{ theme = localStorage.getItem(KEY_THEME) || "system"; }catch(e){}
+  if(!["light","dark","system"].includes(theme)) theme = "system";
+  applyTheme();
   try{ favs = JSON.parse(localStorage.getItem(KEY_FAVS)) || []; }catch(e){ favs = []; }
   favs.forEach((f, i) => { if(typeof f.order !== "number") f.order = i; });
   try{ myColors = JSON.parse(localStorage.getItem(KEY_MYCOLORS)) || []; }catch(e){ myColors = []; }
