@@ -12,12 +12,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <!--
   shima-shima — border tee simulator
-  @version v011
+  @version v012
   担当AI名: Claude / クー
   更新履歴（最新3件のみ）:
+  - v012 (20260612) journalの右隣に「shima-shima」タブ新設（名前の由来・border/stripeの呼称ねじれ・サイト紹介、3言語）。VERSION定数の更新漏れ（v010のまま）を修正
   - v011 (20260612) Journalに欧米波及セクション「across the sea」追加（3言語）、1920年代の記述をマーフィ夫妻込み伝聞形へ修正、timeline 1923/2012/2017追加、references更新
   - v010 (20260611) Journalから楳図かずお氏アイコンを非表示化（デザイン要望）
-  - v009 (20260611) Journalの一次・公式情報ファクトチェック、日本アイコン楳図かずお追加
 -->
 <style>
 :root{
@@ -183,6 +183,7 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
       <button id="tabSim" class="on" data-view="sim">simulator</button>
       <button id="tabFav" data-view="fav">favorites</button>
       <button id="tabRead" data-view="jour">journal</button>
+      <button id="tabAbout" data-view="about">shima-shima</button>
     </nav>
     <select id="langSel" aria-label="language">
       <option value="ja">JP</option>
@@ -295,13 +296,17 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
 <section id="viewJour" class="hidden">
   <article id="journal"></article>
 </section>
+
+<section id="viewAbout" class="hidden">
+  <article id="about"></article>
+</section>
 </main>
 
 <footer>shima-shima by sirop</footer>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
 <script>
-const VERSION = "ボーダーTシミュレーター_v010";
+const VERSION = "ボーダーTシミュレーター_v012";
 const KEY_STATE = "shima-shima_state";
 const KEY_FAVS = "shima-shima_favorites";
 const KEY_LANG = "shima-shima_lang";
@@ -334,7 +339,7 @@ const TODAY_DARKS = ["#1F2A44","#27324F","#B4302E","#1B1B1B","#2E5E4E","#36598A"
 
 const I18N = {
 ja:{
-  nav:["simulator","favorites","journal"],
+  nav:["simulator","favorites","journal","shima-shima"],
   hModel:"model", hColor:"colorway", hStripe:"stripe",
   models:{
     "sj-ouessant":"SJウエッソン風", "sj-naval":"SJナバル風", "sj-morlaix":"SJモーレ風",
@@ -399,10 +404,26 @@ ja:{
     ],
     refsH:"references — 参考",
     refs:'複数の公式・一次資料および解説資料を参照し、確認の弱い起源説や逸話は減らして構成しています。<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a> · <a href="https://en.wikipedia.org/wiki/Marini%C3%A8re" target="_blank" rel="noopener noreferrer">Marinière — Wikipedia</a>'
+  },
+  about:{
+    lede:"「shima-shima」という名前のこと、そしてこのサイトの小さな自己紹介。",
+    sections:[
+      {h:"the name — しましま", ps:[
+        "日本語では、縞模様のことを愛着をこめて「しましま」と呼びます。線がくり返すように、音もくり返す。このサイトの名前は、その日本語の響きをそのままローマ字にしたものです。"
+      ]},
+      {h:"border と stripe — 呼び名のねじれ", ps:[
+        "日本では横縞を「ボーダー」、縦縞を「ストライプ」と呼び分けますが、これは日本だけの使い方とされます。英語では向きにかかわらず縞は stripe。border は本来「縁取り」を指す言葉です。",
+        "つまり「ボーダーT」は、海をわたると striped tee。呼び名のねじれもふくめて、縞をたのしむのがこのサイトです。"
+      ]},
+      {h:"about this site", ps:[
+        "simulatorで自分の縞をつくり、journalで線の服の来歴を歩く。プリセットは愛される定番を観察した「〜風」の再解釈で、特定ブランドの公式設定ではありません。",
+        "shima-shima by sirop"
+      ]}
+    ]
   }
 },
 en:{
-  nav:["simulator","favorites","journal"],
+  nav:["simulator","favorites","journal","shima-shima"],
   hModel:"model", hColor:"colorway", hStripe:"stripe",
   models:{
     "sj-ouessant":"SJ Ouessant", "sj-naval":"SJ Naval", "sj-morlaix":"SJ Morlaix",
@@ -467,10 +488,26 @@ en:{
     ],
     refsH:"references",
     refs:'Built from multiple official and public sources, with weakly supported origin stories and anecdotes deliberately reduced.<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a> · <a href="https://en.wikipedia.org/wiki/Marini%C3%A8re" target="_blank" rel="noopener noreferrer">Marinière — Wikipedia</a>'
+  },
+  about:{
+    lede:"About the name “shima-shima,” and a small introduction to this site.",
+    sections:[
+      {h:"the name", ps:[
+        "In Japanese, stripes are affectionately called “shima-shima” — the word repeats, just as the lines do. This site simply borrows that sound, romanised, as its name."
+      ]},
+      {h:"border vs stripe", ps:[
+        "In Japan, horizontal stripes are called “border” and vertical ones “stripe” — a usage said to be unique to Japanese fashion. In English, a stripe is a stripe whichever way it runs, and a border is an edge or a trim.",
+        "So a Japanese “border tee” becomes, across the sea, a striped tee. This site enjoys stripes — twisted names and all."
+      ]},
+      {h:"about this site", ps:[
+        "Make your own stripe in the simulator; walk the history of the garment in the journal. Presets are observations “in the style of” beloved classics — not official specifications of any brand.",
+        "shima-shima by sirop"
+      ]}
+    ]
   }
 },
 fr:{
-  nav:["simulateur","favoris","journal"],
+  nav:["simulateur","favoris","journal","shima-shima"],
   hModel:"modèle", hColor:"coloris", hStripe:"rayure",
   models:{
     "sj-ouessant":"SJ Ouessant", "sj-naval":"SJ Naval", "sj-morlaix":"SJ Morlaix",
@@ -535,6 +572,22 @@ fr:{
     ],
     refsH:"références",
     refs:'Construit à partir de plusieurs sources officielles et publiques, en réduisant volontairement les récits d’origine et anecdotes peu étayés.<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a> · <a href="https://en.wikipedia.org/wiki/Marini%C3%A8re" target="_blank" rel="noopener noreferrer">Marinière — Wikipedia</a>'
+  },
+  about:{
+    lede:"Le nom « shima-shima », et une petite présentation de ce site.",
+    sections:[
+      {h:"le nom", ps:[
+        "En japonais, les rayures se disent affectueusement « shima-shima » — le mot se répète, comme les lignes. Ce site emprunte simplement ce son, romanisé, pour son nom."
+      ]},
+      {h:"« border » et « stripe »", ps:[
+        "Au Japon, les rayures horizontales se disent « border » et les verticales « stripe » — un usage que l’on dit propre à la mode japonaise. En anglais, une rayure est une stripe quelle que soit sa direction, et border désigne une bordure.",
+        "Ainsi, un « border tee » japonais devient, au-delà des mers, un striped tee — une marinière. Ce site aime les rayures, noms de travers compris."
+      ]},
+      {h:"à propos", ps:[
+        "Composez votre rayure dans le simulateur ; parcourez l’histoire du vêtement dans le journal. Les préréglages sont des observations « dans l’esprit de » classiques aimés — aucune spécification officielle d’une marque.",
+        "shima-shima by sirop"
+      ]}
+    ]
   }
 }
 };
@@ -824,8 +877,8 @@ $("shareBtn").addEventListener("click", () => {
 
 // List sharing removed from UI, sharing now centered in simulator for single designs.
 
-const VIEWS = {sim:"viewSim", fav:"viewFav", jour:"viewJour"};
-const TABS = {sim:"tabSim", fav:"tabFav", jour:"tabRead"};
+const VIEWS = {sim:"viewSim", fav:"viewFav", jour:"viewJour", about:"viewAbout"};
+const TABS = {sim:"tabSim", fav:"tabFav", jour:"tabRead", about:"tabAbout"};
 function switchTab(view){
   Object.keys(VIEWS).forEach(v => {
     $(VIEWS[v]).classList.toggle("hidden", v !== view);
@@ -1286,12 +1339,23 @@ function renderJournal(){
   $("journal").innerHTML = html;
 }
 
+function renderAbout(){
+  const a = t().about;
+  let html = `<p class="lede">${a.lede}</p>`;
+  a.sections.forEach(sec => {
+    html += `<h2>${sec.h}</h2>`;
+    sec.ps.forEach(p => { html += `<p>${p}</p>`; });
+  });
+  $("about").innerHTML = html;
+}
+
 function applyLang(){
   document.documentElement.lang = lang;
   const d = t();
   $("tabSim").textContent = d.nav[0];
   $("tabFav").textContent = d.nav[1];
   $("tabRead").textContent = d.nav[2];
+  $("tabAbout").textContent = d.nav[3];
   $("hModel").textContent = d.hModel;
   $("hColor").textContent = d.hColor;
   $("hStripe").textContent = d.hStripe;
@@ -1316,6 +1380,7 @@ function applyLang(){
   $("modelNote").textContent = d.notes[currentModel.id];
   $("modelName").textContent = captionOverride || d.models[currentModel.id];
   renderJournal();
+  renderAbout();
   if(!$("viewFav").classList.contains("hidden")) renderFavs();
   try{ localStorage.setItem(KEY_LANG, lang); }catch(e){}
 }
