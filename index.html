@@ -12,13 +12,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <!--
   shima-shima — border tee simulator
-  @version v006
-  担当AI名: Codex / コウ
+  @version v007
+  担当AI名: Antigravity / ラビ
   更新履歴（最新3件のみ）:
+  - v007 (20260611) 言語表記JA→JP、共有/画像保存ボタンのシミュレーター集約、個別Tシャツポスター出力化
   - v006 (20260611) Journalを一次・公式資料中心へ減量改訂し、ROCOCO表示リンクを削除
   - v005 (20260611) Journal以外のブランド実名表記を既存の符牒へ統一
-  - v004 (20260611) favorites拡張（手動ソートD&D＋▲▼・リネーム・A→Z/Z→Aソート）、
-    共有リンク（1枚/favorites全体）、今日の一枚、マイカラー登録、favorites画像DL（QR付き）、OGPカード対応
 -->
 <style>
 :root{
@@ -186,7 +185,7 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
       <button id="tabRead" data-view="jour">journal</button>
     </nav>
     <select id="langSel" aria-label="language">
-      <option value="ja">JA</option>
+      <option value="ja">JP</option>
       <option value="en">EN</option>
       <option value="fr">FR</option>
     </select>
@@ -219,6 +218,7 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
       <div class="capbtns">
         <button id="todayBtn"></button>
         <button id="shareBtn"></button>
+        <button id="dlTeeBtn"></button>
         <button id="addFav"></button>
       </div>
     </div>
@@ -268,8 +268,6 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
   <div class="favhead">
     <h2 id="favTitle">favorites</h2>
     <div class="favtools" id="favTools">
-      <button id="shareFavsBtn"></button>
-      <button id="dlBtn"></button>
       <select id="sortSel"></select>
     </div>
   </div>
@@ -290,7 +288,7 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
 <script>
-const VERSION = "ボーダーTシミュレーター_v006";
+const VERSION = "ボーダーTシミュレーター_v007";
 const KEY_STATE = "shima-shima_state";
 const KEY_FAVS = "shima-shima_favorites";
 const KEY_LANG = "shima-shima_lang";
@@ -343,13 +341,13 @@ ja:{
   addFav:"＋ お気に入りに登録", added:"登録しました",
   today:"今日の一枚", todayName:"今日の一枚",
   share:"共有リンク", copied:"✓ コピーしました",
-  shareFavs:"share", download:"save image",
+  download:"画像で保存",
   sorts:["★順","新しい順","古い順","A→Z","Z→A","手動"],
   empty:"まだお気に入りがありません。simulatorで「お気に入りに登録」を。",
   del:"削除", rename:"名前を変更",
   myColorAdd:"いまの配色をマイカラーに登録", myColorTip:"クリックで適用 / ダブルクリックで削除",
   sharedTitle:"共有されたお気に入り", importFavs:"自分のfavoritesに取り込む", close:"閉じる",
-  posterTitle:"MY FAVORITE SHIMA-SHIMA",
+  posterTitle:"わたしの好きな shima-shima",
   journal:{
     lede:"ボーダーTは、ただの柄ではなく、海で働く人の背中から暮らしの定番へと歩いてきた「線の服」。その来歴を、歩く速度で。",
     sections:[
@@ -400,13 +398,13 @@ en:{
   addFav:"＋ save to favorites", added:"saved",
   today:"today’s stripe", todayName:"today’s stripe",
   share:"share link", copied:"✓ copied",
-  shareFavs:"share", download:"save image",
+  download:"save image",
   sorts:["by rating","newest","oldest","A→Z","Z→A","manual"],
   empty:"No favorites yet — save one from the simulator.",
   del:"delete", rename:"rename",
   myColorAdd:"save current colors", myColorTip:"click to apply / double-click to remove",
   sharedTitle:"shared favorites", importFavs:"add to my favorites", close:"close",
-  posterTitle:"MY FAVORITE SHIMA-SHIMA",
+  posterTitle:"my favorite shima-shima",
   journal:{
     lede:"The breton stripe is more than a pattern — a garment of lines that walked from sailors’ backs into everyday wardrobes. Its story, at walking pace.",
     sections:[
@@ -457,13 +455,13 @@ fr:{
   addFav:"＋ ajouter aux favoris", added:"ajouté",
   today:"la rayure du jour", todayName:"la rayure du jour",
   share:"lien de partage", copied:"✓ copié",
-  shareFavs:"partager", download:"image",
+  download:"enregistrer l’image",
   sorts:["par note","récents","anciens","A→Z","Z→A","manuel"],
   empty:"Pas encore de favoris — enregistrez-en depuis le simulateur.",
   del:"supprimer", rename:"renommer",
   myColorAdd:"garder ces couleurs", myColorTip:"clic pour appliquer / double-clic pour retirer",
   sharedTitle:"favoris partagés", importFavs:"ajouter à mes favoris", close:"fermer",
-  posterTitle:"MY FAVORITE SHIMA-SHIMA",
+  posterTitle:"mon shima-shima préféré",
   journal:{
     lede:"La marinière est plus qu’un motif — un vêtement de lignes, passé du dos des marins aux garde-robes de tous les jours. Son histoire, au pas de promenade.",
     sections:[
@@ -685,11 +683,7 @@ $("shareBtn").addEventListener("click", () => {
   copyText(pageUrl() + "#d=" + b64e(JSON.stringify(d)), $("shareBtn"));
 });
 
-$("shareFavsBtn").addEventListener("click", () => {
-  if(!favs.length) return;
-  const arr = sortedFavs().map(f => [f.model, f.sw, f.gw, f.pl, f.base, f.stripe, f.rating, f.name || 0]);
-  copyText(pageUrl() + "#f=" + b64e(JSON.stringify(arr)), $("shareFavsBtn"));
-});
+// List sharing removed from UI, sharing now centered in simulator for single designs.
 
 const VIEWS = {sim:"viewSim", fav:"viewFav", jour:"viewJour"};
 const TABS = {sim:"tabSim", fav:"tabFav", jour:"tabRead"};
@@ -968,99 +962,129 @@ $("closeShared").addEventListener("click", () => {
   renderFavs();
 });
 
-$("dlBtn").addEventListener("click", () => {
-  const list = sortedFavs();
-  if(!list.length) return;
-  const W = 1080, headH = 210, rowH = 124, footH = 240;
-  const H = headH + list.length * rowH + footH;
-  const cv = document.createElement("canvas");
-  cv.width = W; cv.height = H;
-  const ctx = cv.getContext("2d");
-  ctx.fillStyle = "#faf9f6";
-  ctx.fillRect(0, 0, W, H);
+$("dlTeeBtn").addEventListener("click", () => {
+  const svgEl = document.querySelector(".stage svg");
+  const svgClone = svgEl.cloneNode(true);
+  svgClone.setAttribute("width", "540");
+  svgClone.setAttribute("height", "540");
+  svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
 
-  ctx.fillStyle = "#1c1b19";
-  ctx.font = "26px 'Helvetica Neue', Helvetica, sans-serif";
-  try{ ctx.letterSpacing = "10px"; }catch(e){}
-  ctx.fillText(t().posterTitle, 80, 110);
-  try{ ctx.letterSpacing = "4px"; }catch(e){}
-  ctx.fillStyle = "#8e8a82";
-  ctx.font = "15px 'Helvetica Neue', Helvetica, sans-serif";
-  const now = new Date();
-  const pad = n => String(n).padStart(2, "0");
-  ctx.fillText(`${now.getFullYear()}.${pad(now.getMonth()+1)}.${pad(now.getDate())}`, 80, 145);
-  ctx.strokeStyle = "#e3e0d8";
-  ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(80, headH - 30); ctx.lineTo(W - 80, headH - 30); ctx.stroke();
+  const svgString = new XMLSerializer().serializeToString(svgClone);
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
 
-  try{ ctx.letterSpacing = "0px"; }catch(e){}
-  list.forEach((f, idx) => {
-    const y = headH + idx * rowH;
-    const sx = 80, sy = y + 14, ss = 84;
-    ctx.fillStyle = f.base;
-    ctx.fillRect(sx, sy, ss, ss);
-    ctx.fillStyle = f.stripe;
-    const period = (f.sw + f.gw) / 2;
-    for(let yy = 0; yy < ss; yy += period){
-      ctx.fillRect(sx, sy + yy, ss, Math.min(f.sw / 2, ss - yy));
-    }
-    ctx.strokeStyle = "#e3e0d8";
-    ctx.strokeRect(sx, sy, ss, ss);
+  img.onload = () => {
+    const W = 1080, H = 1350;
+    const cv = document.createElement("canvas");
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext("2d");
+    
+    // Draw background
+    ctx.fillStyle = "#faf9f6";
+    ctx.fillRect(0, 0, W, H);
 
+    // Title
     ctx.fillStyle = "#1c1b19";
-    ctx.font = "22px 'Hiragino Sans', 'Helvetica Neue', sans-serif";
-    ctx.fillText(dispName(f), 200, y + 48);
+    ctx.font = "38px 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif";
+    try { ctx.letterSpacing = "4px"; } catch(e) {}
+    ctx.textAlign = "center";
+    ctx.fillText(t().posterTitle, W / 2, 160);
+
+    // Divider under title
+    ctx.strokeStyle = "#e3e0d8";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(120, 220);
+    ctx.lineTo(W - 120, 220);
+    ctx.stroke();
+
+    // Draw T-shirt
+    ctx.drawImage(img, (W - 540) / 2, 280, 540, 540);
+
+    // Divider under T-shirt
+    ctx.beginPath();
+    ctx.moveTo(120, 880);
+    ctx.lineTo(W - 120, 880);
+    ctx.stroke();
+
+    // Text details (left aligned)
+    ctx.textAlign = "left";
+    try { ctx.letterSpacing = "0px"; } catch(e) {}
+
+    // Model Name
+    ctx.fillStyle = "#1c1b19";
+    ctx.font = "32px 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif";
+    const modelText = captionOverride || t().models[currentModel.id];
+    ctx.fillText(modelText, 120, 950);
+
+    // Specs
     ctx.fillStyle = "#8e8a82";
-    ctx.font = "13px 'Helvetica Neue', Helvetica, sans-serif";
-    ctx.fillText(`STRIPE ${f.sw} · GAP ${f.gw} · PLAIN ${f.pl} · ${f.base.toUpperCase()} / ${f.stripe.toUpperCase()}`, 200, y + 78);
-    ctx.font = "18px 'Hiragino Sans', sans-serif";
-    ctx.fillStyle = "#1c1b19";
-    const filled = "★".repeat(f.rating);
-    ctx.fillText(filled, W - 240, y + 55);
-    ctx.fillStyle = "#c9c5bb";
-    ctx.fillText("★".repeat(5 - f.rating), W - 240 + ctx.measureText(filled).width, y + 55);
+    ctx.font = "18px 'Helvetica Neue', Helvetica, sans-serif";
+    try { ctx.letterSpacing = "4px"; } catch(e) {}
+    const sw = +$("sw").value, gw = +$("gw").value, pl = +$("pl").value;
+    ctx.fillText(`STRIPE ${sw} · GAP ${gw} · PLAIN ${pl}`, 120, 1005);
 
-    ctx.strokeStyle = "#e3e0d8";
-    ctx.beginPath(); ctx.moveTo(80, y + rowH - 4); ctx.lineTo(W - 80, y + rowH - 4); ctx.stroke();
-  });
+    // Colors
+    try { ctx.letterSpacing = "2px"; } catch(e) {}
+    const bColor = $("base").value.toUpperCase();
+    const sColor = $("stripe").value.toUpperCase();
+    ctx.fillText(`${bColor} / ${sColor}`, 120, 1050);
 
-  const fy = headH + list.length * rowH;
-  ctx.fillStyle = "#8e8a82";
-  ctx.font = "14px 'Helvetica Neue', Helvetica, sans-serif";
-  try{ ctx.letterSpacing = "6px"; }catch(e){}
-  ctx.fillText("SHIMA-SHIMA BY SIROP", 80, fy + 100);
-  try{ ctx.letterSpacing = "0px"; }catch(e){}
-  ctx.font = "12px 'Helvetica Neue', Helvetica, sans-serif";
-  ctx.fillText("sirop-d.github.io/shima-shima", 80, fy + 130);
+    // Site Credit
+    ctx.fillStyle = "#b8b4aa";
+    ctx.font = "14px 'Helvetica Neue', Helvetica, sans-serif";
+    try { ctx.letterSpacing = "4px"; } catch(e) {}
+    ctx.fillText("SHIMA-SHIMA BY SIROP", 120, 1120);
+    try { ctx.letterSpacing = "0px"; } catch(e) {}
+    ctx.font = "12px 'Helvetica Neue', Helvetica, sans-serif";
+    ctx.fillText("sirop-d.github.io/shima-shima", 120, 1145);
 
-  if(typeof qrcode !== "undefined"){
-    try{
-      const arr = list.map(f => [f.model, f.sw, f.gw, f.pl, f.base, f.stripe, f.rating, f.name || 0]);
-      const q = qrcode(0, "M");
-      q.addData(pageUrl() + "#f=" + b64e(JSON.stringify(arr)));
-      q.make();
-      const n = q.getModuleCount();
-      const cell = Math.max(2, Math.floor(150 / n));
-      const qs = n * cell;
-      const qx = W - 80 - qs, qy = fy + 40;
-      ctx.fillStyle = "#ffffff";
-      ctx.fillRect(qx - 10, qy - 10, qs + 20, qs + 20);
-      ctx.fillStyle = "#1c1b19";
-      for(let r = 0; r < n; r++){
-        for(let c = 0; c < n; c++){
-          if(q.isDark(r, c)) ctx.fillRect(qx + c * cell, qy + r * cell, cell, cell);
+    // QR code
+    if (typeof qrcode !== "undefined") {
+      try {
+        const d = [currentModel.id, sw, gw, pl, $("base").value, $("stripe").value];
+        const q = qrcode(0, "M");
+        q.addData(pageUrl() + "#d=" + b64e(JSON.stringify(d)));
+        q.make();
+        const n = q.getModuleCount();
+        const cell = Math.max(2, Math.floor(180 / n));
+        const qs = n * cell;
+        const qx = W - 120 - qs;
+        const qy = 930;
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(qx - 10, qy - 10, qs + 20, qs + 20);
+        ctx.fillStyle = "#1c1b19";
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (q.isDark(r, c)) {
+              ctx.fillRect(qx + c * cell, qy + r * cell, cell, cell);
+            }
+          }
         }
+      } catch(e) {
+        console.error("QR Code generation failed", e);
       }
-    }catch(e){}
-  }
+    }
 
-  cv.toBlob(blob => {
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "shima-shima_favorites.png";
-    a.click();
-    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-  });
+    cv.toBlob(blob => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `shima-shima_${currentModel.id}.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    });
+
+    URL.revokeObjectURL(url);
+  };
+
+  img.onerror = (err) => {
+    console.error("Image load failed", err);
+    URL.revokeObjectURL(url);
+  };
+
+  img.src = url;
 });
 
 function renderJournal(){
@@ -1102,9 +1126,8 @@ function applyLang(){
   $("todayBtn").textContent = d.today;
   $("shareBtn").textContent = d.share;
   $("shareBtn").dataset.label = d.share;
-  $("shareFavsBtn").textContent = d.shareFavs;
-  $("shareFavsBtn").dataset.label = d.shareFavs;
-  $("dlBtn").textContent = d.download;
+  $("dlTeeBtn").textContent = d.download;
+  $("dlTeeBtn").dataset.label = d.download;
   $("importBtn").textContent = d.importFavs;
   $("closeShared").textContent = d.close;
   buildModelSel();
