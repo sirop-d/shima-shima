@@ -12,13 +12,13 @@
 <meta name="twitter:card" content="summary_large_image">
 <!--
   shima-shima — border tee simulator
-  @version v004
-  担当AI名: Claude / クー
+  @version v006
+  担当AI名: Codex / コウ
   更新履歴（最新3件のみ）:
+  - v006 (20260611) Journalを一次・公式資料中心へ減量改訂し、ROCOCO表示リンクを削除
+  - v005 (20260611) Journal以外のブランド実名表記を既存の符牒へ統一
   - v004 (20260611) favorites拡張（手動ソートD&D＋▲▼・リネーム・A→Z/Z→Aソート）、
     共有リンク（1枚/favorites全体）、今日の一枚、マイカラー登録、favorites画像DL（QR付き）、OGPカード対応
-  - v003 (20260611) プルダウン化、日英仏切替、モデル名刷新、favoritesタブ（★評価・ソート・削除）
-  - v002 (20260611) UI全面刷新。エディトリアル調へ。長袖シルエット化
 -->
 <style>
 :root{
@@ -290,7 +290,7 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
 <script>
-const VERSION = "ボーダーTシミュレーター_v004";
+const VERSION = "ボーダーTシミュレーター_v006";
 const KEY_STATE = "shima-shima_state";
 const KEY_FAVS = "shima-shima_favorites";
 const KEY_LANG = "shima-shima_lang";
@@ -329,7 +329,7 @@ ja:{
     "bee-russell":"蜂 ラッセル風", "mj":"MJ風", "uncl":"UNCL風", "original":"オリジナル"
   },
   notes:{
-    "sj-ouessant":"セントジェームスの定番。厚手・等ピッチ・全面ボーダー。",
+    "sj-ouessant":"SJの定番。厚手・等ピッチ・全面ボーダー。",
     "sj-naval":"胸元が無地のタイプ。細めの縞が下半分に入る。",
     "sj-morlaix":"薄手・細ピッチ。春夏向けの軽い表情。",
     "bee-russell":"目の詰まった生地に細めの縞。間隔広めで上品。",
@@ -354,33 +354,28 @@ ja:{
     lede:"ボーダーTは、ただの柄ではなく、海で働く人の背中から暮らしの定番へと歩いてきた「線の服」。その来歴を、歩く速度で。",
     sections:[
       {h:"origins — 成り立ち", ps:[
-        "起源は16世紀頃、スペイン・バスク地方の船乗りたちが着ていた手編みのウールやコットンのセーターが縞模様だったことにあるといわれる。日本で「バスクシャツ」と呼ばれるのはこの説に由来する。",
-        "その後、フランス・ノルマンディーやブルターニュの船乗りたちが、視界の悪い海上でも人を見つけやすいように縞のシャツを着るようになり、これがフランス海軍の水兵の制服「マリニエール」へとつながった。海に落ちた仲間を見つけるための実用の柄が出発点、というのがボーダーの面白いところ。"
+        "1858年、フランス海軍は青と白の縞模様のニットを水兵の制服として規定した。海で働く人のための服だったマリニエールは、やがて暮らしの中へ歩き出していく。",
+        "縞は、線そのものよりも線と線のあいだで表情が変わる。太さ、間隔、胸元の余白。shima-shimaは、その小さな違いを眺めるための場所でもある。"
       ]},
       {h:"into fashion — モードへ", ps:[
-        "1910年代、ココ・シャネルが漁師や水兵の装いに着想を得たマリンルックを打ち出し、労働着だったボーダーがモードの世界に持ち込まれたといわれる。1923年には芸術家の着用をきっかけに欧米のリゾート地で大流行し、以降「リゾート・休日・自由」のイメージをまとった定番になった。",
-        "日本では1960年代にセントジェームスが上陸し、1980〜1990年代のマリンスタイル・フレンチカジュアルのブームで一気に広まった。"
+        "1910年代、ココ・シャネルはドーヴィルなどでジャージー素材のスポーツウェアを展開し、実用着に使われていた素材を女性のファッションへ取り入れた。",
+        "制服だった線は、着る人と時代が変わるたびに、仕事着、休日着、日常着へと読み替えられてきた。"
       ]}
     ],
     iconsH:"icons — ボーダーを愛した人々",
     icons:[
-      ["パブロ・ピカソ","ドアノー撮影の「パンの指」の写真があまりに有名。黒（紺）×生成の太めボーダーはいまも「ピカソ配色」と呼ばれる。"],
-      ["ジェームス・ディーン","反骨のアイコンが着ることで、マリンの柄に都会の顔が加わった。"],
-      ["アンディ・ウォーホル","サングラスにボーダーがほぼ制服。アートとボーダーの結びつきを決定づけた。"],
-      ["ココ・シャネル","着た人であると同時に、ボーダーをモードに引き上げた張本人。"],
-      ["ジーン・セバーグ、ブリジット・バルドー","1960年代、映画とともにフレンチシックの象徴に。"],
-      ["ジャン＝ポール・ゴルチエ","ボーダーを自身のアイデンティティとしてコレクションの主役に据えた。"]
+      ["パブロ・ピカソ","1952年、ロベール・ドアノーが撮影した「パンの指」の写真にも、ボーダーを着た姿が残る。"],
+      ["ココ・シャネル","ジャージー素材のスポーツウェアを通じて、実用着の感覚を女性のファッションへ持ち込んだ。"],
+      ["ジャン＝ポール・ゴルチエ","マリニエールを自身の象徴とし、コレクションやフレグランスのデザインにも用いた。"]
     ],
     tlH:"timeline — 小さな年表",
     tl:[
-      ["1889","セントジェームス創業（モン・サン＝ミッシェル近郊の町サン・ジェームス）。代表作はウエッソン、ナバル"],
-      ["1936","ル・ミノア誕生（ブルターニュ）。生地から縫製までフランス自社工場"],
-      ["1939","オーチバル創業。フランス海軍に制服を納めた歴史を持つ"],
-      ["1960s","セントジェームスが日本上陸"],
-      ["1980–90s","日本のマリンブームの火付け役に。以降、無印良品やユニクロが定番化し、誰の暮らしにもボーダーがある風景になった"]
+      ["1858","フランス海軍が青と白の縞模様のニットを水兵の制服として規定"],
+      ["1910s","シャネルがジャージー素材のスポーツウェアを展開"],
+      ["1922","ル・ミノア創業。フランス国内でのものづくりを続ける"]
     ],
     refsH:"references — 参考",
-    refs:'<a href="https://roco2web.com/blogs/koromobito/20240726_165" target="_blank" rel="noopener">世界中で愛され続ける“ボーダー”の魅力｜ROCOCO ONLINE STORE</a><br>年代や逸話には諸説あるものが含まれます。本ページは「〜といわれる」の粒度で楽しむ読みものです。'
+    refs:'複数の公式・公開資料を参照し、確認の弱い由来説や逸話は減らして構成しています。<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a>'
   }
 },
 en:{
@@ -416,33 +411,28 @@ en:{
     lede:"The breton stripe is more than a pattern — a garment of lines that walked from sailors’ backs into everyday wardrobes. Its story, at walking pace.",
     sections:[
       {h:"origins", ps:[
-        "The origin is said to lie in the 16th century, when sailors of the Basque country wore hand-knitted wool and cotton sweaters with stripes. In Japan these shirts are still called “Basque shirts” after this theory.",
-        "Later, sailors of Normandy and Brittany took to striped shirts so that a man overboard could be spotted in poor visibility — and the stripe became the French navy’s marinière. A practical pattern for finding a fallen crewmate: that is where the border begins."
+        "In 1858, the French navy formally specified a blue-and-white striped knit for its sailors. The marinière began as clothing for work at sea, then gradually walked into everyday life.",
+        "A stripe changes character not only through its lines, but through the spaces between them: width, rhythm, and the quiet area across the chest. shima-shima is a place for noticing those small differences."
       ]},
       {h:"into fashion", ps:[
-        "In the 1910s Coco Chanel, inspired by fishermen and sailors, brought the working stripe into fashion. In 1923 an artist’s wearing of it set off a craze across European resorts, and the stripe came to mean leisure, holidays and freedom.",
-        "The French marine stripe reached Japan in the 1960s, and the marine style boom of the 1980s–90s made it a wardrobe standard."
+        "In the 1910s, Coco Chanel presented jersey sportswear in places including Deauville, bringing a material associated with practical clothing into women’s fashion.",
+        "As its wearers and times changed, the regulated line of a uniform was re-read as workwear, holiday wear, and an everyday standard."
       ]}
     ],
     iconsH:"icons",
     icons:[
-      ["Pablo Picasso","Doisneau’s photograph with the bread-roll fingers is unforgettable. The bold black-on-ecru stripe is still called the “Picasso colorway”."],
-      ["James Dean","When the rebel icon wore stripes, the marine pattern gained an urban face."],
-      ["Andy Warhol","Sunglasses and stripes, almost a uniform — sealing the bond between art and the border."],
-      ["Coco Chanel","A wearer, and the very person who lifted the stripe into fashion."],
-      ["Jean Seberg, Brigitte Bardot","In the 1960s, with the films of the era, the symbol of French chic."],
-      ["Jean-Paul Gaultier","Made the stripe his identity and the protagonist of his collections."]
+      ["Pablo Picasso","Robert Doisneau’s 1952 photograph known as “Picasso and the Loaves” preserves an enduring image of him in stripes."],
+      ["Coco Chanel","Through jersey sportswear, she brought the sensibility of practical clothing into women’s fashion."],
+      ["Jean-Paul Gaultier","He made the marinière a personal signature, using it in collections and fragrance design."]
     ],
     tlH:"timeline",
     tl:[
-      ["1889","Saint James founded near Mont Saint-Michel. Known for the Ouessant and the Naval"],
-      ["1936","Le Minor born in Brittany — woven and sewn in its own French workshops"],
-      ["1939","Orcival founded; it once supplied uniforms to the French navy"],
-      ["1960s","Saint James lands in Japan"],
-      ["1980–90s","The spark of Japan’s marine boom. MUJI and UNIQLO later make the stripe an everyday standard"]
+      ["1858","The French navy specifies a blue-and-white striped knit for sailors"],
+      ["1910s","Chanel develops jersey sportswear"],
+      ["1922","Le Minor is founded and continues making garments in France"]
     ],
     refsH:"references",
-    refs:'<a href="https://roco2web.com/blogs/koromobito/20240726_165" target="_blank" rel="noopener">The charm of borders, loved around the world — ROCOCO ONLINE STORE (Japanese)</a><br>Some dates and anecdotes are debated. This page is meant to be read in the spirit of “so it is said.”'
+    refs:'Built from multiple official and public sources, with weakly supported origin stories and anecdotes deliberately reduced.<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a>'
   }
 },
 fr:{
@@ -478,33 +468,28 @@ fr:{
     lede:"La marinière est plus qu’un motif — un vêtement de lignes, passé du dos des marins aux garde-robes de tous les jours. Son histoire, au pas de promenade.",
     sections:[
       {h:"origines", ps:[
-        "L’origine remonterait au XVIe siècle, quand les marins du Pays basque portaient des tricots rayés de laine et de coton. Au Japon, on appelle encore ces hauts « chemises basques ».",
-        "Plus tard, les marins de Normandie et de Bretagne adoptèrent les rayures pour être repérés en mer par mauvaise visibilité — et la rayure devint la marinière de la Marine nationale. Un motif pratique pour retrouver un camarade tombé à l’eau : c’est là que tout commence."
+        "En 1858, la Marine française définit officiellement un tricot rayé bleu et blanc pour ses marins. Vêtement de travail en mer, la marinière entre peu à peu dans la vie quotidienne.",
+        "Une rayure change de caractère autant par ses lignes que par les espaces entre elles : largeur, rythme, silence sur la poitrine. shima-shima est aussi un lieu pour observer ces petites différences."
       ]},
       {h:"vers la mode", ps:[
-        "Dans les années 1910, Coco Chanel, inspirée des pêcheurs et des marins, fait entrer la rayure ouvrière dans la mode. En 1923, portée par un artiste, elle déferle sur les stations balnéaires d’Europe et devient synonyme de vacances et de liberté.",
-        "La marinière arrive au Japon dans les années 1960 ; le boom du style marin des années 1980–90 en fait un classique du quotidien."
+        "Dans les années 1910, Coco Chanel présente notamment à Deauville des vêtements de sport en jersey, introduisant dans la mode féminine une matière associée aux vêtements pratiques.",
+        "Au fil des époques et de celles et ceux qui la portent, la ligne réglementée de l’uniforme devient vêtement de travail, de vacances, puis du quotidien."
       ]}
     ],
     iconsH:"icônes",
     icons:[
-      ["Pablo Picasso","La photographie de Doisneau, avec les petits pains en guise de doigts, est inoubliable. La large rayure noire sur écru s’appelle encore « coloris Picasso »."],
-      ["James Dean","Porté par l’icône rebelle, le motif marin gagne un visage urbain."],
-      ["Andy Warhol","Lunettes noires et rayures, presque un uniforme — l’art et la marinière définitivement liés."],
-      ["Coco Chanel","Elle l’a portée, et c’est elle qui l’a hissée dans la mode."],
-      ["Jean Seberg, Brigitte Bardot","Dans les années 1960, avec le cinéma, symbole du chic à la française."],
-      ["Jean-Paul Gaultier","Il a fait de la rayure son identité et la protagoniste de ses collections."]
+      ["Pablo Picasso","La photographie de Robert Doisneau réalisée en 1952, connue sous le nom « Picasso et les pains », conserve son image en rayures."],
+      ["Coco Chanel","Par le jersey sportswear, elle introduit la sensibilité du vêtement pratique dans la mode féminine."],
+      ["Jean-Paul Gaultier","Il fait de la marinière une signature personnelle, présente dans ses collections et ses parfums."]
     ],
     tlH:"repères",
     tl:[
-      ["1889","Fondation de Saint James, près du Mont-Saint-Michel. Célèbre pour l’Ouessant et le Naval"],
-      ["1936","Naissance de Le Minor en Bretagne — tissé et cousu dans ses ateliers français"],
-      ["1939","Fondation d’Orcival, ancien fournisseur de la Marine nationale"],
-      ["1960s","Saint James arrive au Japon"],
-      ["1980–90s","Étincelle du boom marin japonais. MUJI et UNIQLO en font ensuite un basique du quotidien"]
+      ["1858","La Marine française définit un tricot rayé bleu et blanc pour ses marins"],
+      ["1910s","Chanel développe des vêtements de sport en jersey"],
+      ["1922","Fondation de Le Minor, qui poursuit sa fabrication en France"]
     ],
     refsH:"références",
-    refs:'<a href="https://roco2web.com/blogs/koromobito/20240726_165" target="_blank" rel="noopener">Le charme des rayures, aimées dans le monde entier — ROCOCO ONLINE STORE (en japonais)</a><br>Certaines dates et anecdotes restent discutées. Cette page se lit sur le mode du « dit-on ».'
+    refs:'Construit à partir de plusieurs sources officielles et publiques, en réduisant volontairement les récits d’origine et anecdotes peu étayés.<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a>'
   }
 }
 };

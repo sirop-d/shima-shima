@@ -16,7 +16,7 @@ A playful border T-shirt simulator for classic marine stripes and original shima
 
 長袖のボーダーTが好きな人のための、ボーダーTシミュレーターです。
 
-SJウエッソン風、SJナバル風、SJモーレ風、オーチバル風、無印良品風、ユニクロ風、そしてオリジナル配色まで、縞の太さ・間隔・胸元の無地・配色を触りながら試せる小さなWebアプリとして育てています。
+SJウエッソン風、SJナバル風、SJモーレ風、蜂 ラッセル風、MJ風、UNCL風、そしてオリジナル配色まで、縞の太さ・間隔・胸元の無地・配色を触りながら試せる小さなWebアプリとして育てています。
 
 ### コンセプト
 
@@ -33,7 +33,11 @@ SJウエッソン風、SJナバル風、SJモーレ風、オーチバル風、�
 - 胸元の無地エリア調整
 - 地色と線色の入れ替え
 - 配色プリセット
-- 設定のローカル保存
+- 今日の一枚とマイカラー保存
+- お気に入り登録・評価・並べ替え・リネーム
+- 1枚またはお気に入り一覧の共有リンク
+- QRコードつきお気に入りポスター画像保存
+- 日本語・英語・フランス語切替
 - ボーダーシャツ文化についての読みものページ
 
 ### プリセット
@@ -59,7 +63,7 @@ SJウエッソン風、SJナバル風、SJモーレ風、オーチバル風、�
 ### 注意書き
 
 このプロジェクトは、クラシックなボーダーTシャツから着想を得た非公式のビジュアルシミュレーターです。
-Saint James、Orcival、MUJI、UNIQLO、および関連ブランドとは関係ありません。
+プリセット名に使う `SJ`、`蜂`、`MJ`、`UNCL` などの符牒は非公式な呼称であり、関連するブランドとは関係ありません。
 
 ブランド名やモデル名への言及は、文化的・視覚的な着想を説明するためのものです。公式製品を正確に複製することではなく、縞模様を観察し、再解釈することを目的としています。
 
@@ -69,7 +73,7 @@ Saint James、Orcival、MUJI、UNIQLO、および関連ブランドとは関係�
 
 `shima-shima` is a playful border T-shirt simulator for people who love long-sleeve striped shirts.
 
-It is being developed as a small web app where you can explore Saint James-inspired, Orcival-inspired, MUJI-inspired, UNIQLO-inspired, and original stripe designs by adjusting stripe width, spacing, blank chest areas, and color combinations.
+It is being developed as a small web app where you can explore SJ-inspired, Bee Russell-inspired, MJ-inspired, UNCL-inspired, and original stripe designs by adjusting stripe width, spacing, blank chest areas, and color combinations.
 
 ### Concept
 
@@ -86,7 +90,11 @@ By observing the atmosphere of iconic shirts and beloved brands, you can adjust 
 - Blank chest area adjustment
 - Ground color / stripe color swap
 - Color presets
-- Local settings save
+- Daily stripe and saved custom colors
+- Favorite saving, rating, ordering, and renaming
+- Share links for one stripe or a favorites collection
+- Favorites poster image export with QR code
+- Japanese, English, and French interface
 - Reading page about border shirt culture
 
 ### Presets
@@ -112,7 +120,7 @@ Planned / experimental presets include:
 ### Notes
 
 This project is an unofficial visual simulator inspired by classic border T-shirts.
-It is not affiliated with Saint James, Orcival, MUJI, UNIQLO, or any related brands.
+Preset codenames such as `SJ`, `Bee`, `MJ`, and `UNCL` are unofficial and are not affiliated with any related brands.
 
 Brand and model references are used only as cultural and visual inspiration. The simulator aims to observe and reinterpret stripe patterns, not reproduce official products exactly.
 
@@ -122,7 +130,7 @@ Brand and model references are used only as cultural and visual inspiration. The
 
 `shima-shima` est un simulateur ludique de marinières et de T-shirts à rayures, pensé pour les personnes qui aiment les hauts à manches longues et les motifs rayés.
 
-Le projet prend la forme d’une petite application web permettant d’explorer des motifs inspirés de Saint James, d’Orcival, de MUJI, d’UNIQLO, ainsi que des combinaisons originales, en ajustant l’épaisseur des rayures, leur espacement, les zones unies sur la poitrine et les couleurs.
+Le projet prend la forme d’une petite application web permettant d’explorer des motifs inspirés de SJ, d’Abeille Russell, de MJ, d’UNCL, ainsi que des combinaisons originales, en ajustant l’épaisseur des rayures, leur espacement, les zones unies sur la poitrine et les couleurs.
 
 ### Concept
 
@@ -139,7 +147,11 @@ En observant l’atmosphère de modèles iconiques et de marques appréciées, o
 - Réglage de la zone unie sur la poitrine
 - Inversion de la couleur de fond et de la couleur des rayures
 - Préréglages de couleurs
-- Sauvegarde locale des réglages
+- Rayure du jour et sauvegarde de coloris personnels
+- Favoris avec notes, ordre manuel et renommage
+- Liens de partage pour une rayure ou une collection de favoris
+- Export d’une affiche de favoris avec QR code
+- Interface en japonais, anglais et français
 - Page de lecture sur la culture des marinières et des vêtements à rayures
 
 ### Préréglages
@@ -165,7 +177,7 @@ Préréglages prévus / expérimentaux :
 ### Notes
 
 Ce projet est un simulateur visuel non officiel inspiré des T-shirts à rayures classiques.
-Il n’est affilié ni à Saint James, ni à Orcival, ni à MUJI, ni à UNIQLO, ni à aucune marque liée.
+Les noms de code de préréglage tels que `SJ`, `Abeille`, `MJ` et `UNCL` sont non officiels et ne sont affiliés à aucune marque liée.
 
 Les références aux marques et aux modèles servent uniquement à décrire une inspiration culturelle et visuelle. Le simulateur vise à observer et réinterpréter les motifs à rayures, et non à reproduire exactement des produits officiels.
 
