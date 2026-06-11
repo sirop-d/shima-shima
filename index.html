@@ -12,12 +12,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <!--
   shima-shima — border tee simulator
-  @version v009
+  @version v010
   担当AI名: Antigravity / ラビ
   更新履歴（最新3件のみ）:
+  - v010 (20260611) Journalから楳図かずお氏アイコンを非表示化（デザイン要望）
   - v009 (20260611) Journalの一次・公式情報ファクトチェック、日本アイコン楳図かずお追加
   - v008 (20260611) ナバル風無地を77へ調整、6色指定マルチカラーボーダー（蜂マルチ風）追加
-  - v007 (20260611) 言語表記JA→JP、共有/画像保存ボタンのシミュレーター集約、個別Tシャツポスター出力化
 -->
 <style>
 :root{
@@ -301,7 +301,7 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
 <script>
-const VERSION = "ボーダーTシミュレーター_v009";
+const VERSION = "ボーダーTシミュレーター_v010";
 const KEY_STATE = "shima-shima_state";
 const KEY_FAVS = "shima-shima_favorites";
 const KEY_LANG = "shima-shima_lang";
@@ -379,7 +379,6 @@ ja:{
     icons:[
       ["パブロ・ピカソ","ドアノー撮影の写真が有名。アトリエでの作業着として愛用しました。"],
       ["ココ・シャネル","労働着を女性の日常着へと引き上げ、マリンルックを定義しました。"],
-      ["楳図かずお","赤白のボーダーを生涯のトレードマークとし、作品や独自の美学と結びつけました。"],
       ["ジャン＝ポール・ゴルチエ","マリニエールを自身のシグネチャーとし、コレクションの主役に据えました。"]
     ],
     tlH:"timeline — 小さな年表",
@@ -441,7 +440,6 @@ en:{
     icons:[
       ["Pablo Picasso","Famous in Robert Doisneau's photographs, he wore it as his workshop attire."],
       ["Coco Chanel","Elevated sailor workwear into women's everyday fashion, defining the marine look."],
-      ["Kazuo Umezu","Manga artist who made the red-and-white stripes his lifelong trademark and aesthetic signature."],
       ["Jean-Paul Gaultier","Adopted the marinière as his signature, placing it at the center of his collections."]
     ],
     tlH:"timeline",
@@ -503,7 +501,6 @@ fr:{
     icons:[
       ["Pablo Picasso","Célèbre sur les photos de Robert Doisneau, il la portait comme vêtement d'atelier."],
       ["Coco Chanel","A élevé la marinière de travail au rang de mode féminine, définissant le look marine."],
-      ["Kazuo Umezu","Artiste de manga qui a fait des rayures rouges et blanches sa signature esthétique et personnelle à vie."],
       ["Jean-Paul Gaultier","A fait de la marinière sa signature personnelle, la plaçant au cœur de ses défilés."]
     ],
     tlH:"repères",
