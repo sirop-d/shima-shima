@@ -32,7 +32,7 @@ SJウエッソン風、SJナバル風、SJモーレ風、蜂 ラッセル風、M
 - 縞の太さと間隔の調整
 - 胸元の無地エリア調整
 - 地色と線色の入れ替え
-- 配色プリセット
+- 常設の基本12配色と、moreで展開する遊び色・逆配色
 - 今日の一枚とマイカラー保存
 - お気に入り登録・評価・並べ替え・リネーム
 - 1枚またはお気に入り一覧の共有リンク
@@ -94,7 +94,7 @@ By observing the atmosphere of iconic shirts and beloved brands, you can adjust 
 - Stripe width and spacing controls
 - Blank chest area adjustment
 - Ground color / stripe color swap
-- Color presets
+- Twelve always-visible colorways plus playful and reversed colors under more
 - Daily stripe and saved custom colors
 - Favorite saving, rating, ordering, and renaming
 - Share links for one stripe or a favorites collection
@@ -156,7 +156,7 @@ En observant l’atmosphère de modèles iconiques et de marques appréciées, o
 - Réglage de l’épaisseur et de l’espacement des rayures
 - Réglage de la zone unie sur la poitrine
 - Inversion de la couleur de fond et de la couleur des rayures
-- Préréglages de couleurs
+- Douze coloris toujours visibles, plus des variantes ludiques et inversées sous more
 - Rayure du jour et sauvegarde de coloris personnels
 - Favoris avec notes, ordre manuel et renommage
 - Liens de partage pour une rayure ou une collection de favoris

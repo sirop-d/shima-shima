@@ -12,12 +12,12 @@
 <meta name="twitter:card" content="summary_large_image">
 <!--
   shima-shima — border tee simulator
-  @version v014
+  @version v015
   担当AI名: Codex / コウ
   更新履歴（最新3件のみ）:
+  - v015 (20260612) 基本12カラーバリエーションとmore展開、日英仏の配色名ツールチップを追加
   - v014 (20260612) 二段ヘッダー、JPN/ENG/FRA、極細設定アイコン、ABOUT sirop、全履歴へ展開できるdevelopment journalを追加
   - v013 (20260612) ライト・ダーク・システム設定を追加。ロゴの説明表示とsimulator導線、shima-shimaタブの説明強化、フッター版情報ダイアログを3言語対応
-  - v012 (20260612) journalの右隣に「shima-shima」タブ新設（名前の由来・border/stripeの呼称ねじれ・サイト紹介、3言語）。VERSION定数の更新漏れ（v010のまま）を修正
 -->
 <style>
 :root{
@@ -109,6 +109,11 @@ main{max-width:1020px; margin:0 auto; padding:64px 48px 80px;}
   display:flex; align-items:center; justify-content:center;
 }
 .dots .addc:hover{color:var(--ink); border-color:var(--gray);}
+.dots .more-toggle{
+  width:auto; height:22px; border-radius:999px; padding:0 9px;
+  font-size:9.5px; letter-spacing:.12em; color:var(--gray); background:transparent;
+}
+.dots .more-toggle:hover{color:var(--ink); border-color:var(--gray);}
 #myColors{margin-top:12px;}
 .pickers{display:flex; align-items:center; gap:14px; margin-top:22px;}
 .pickers label{font-size:11px; color:var(--gray); letter-spacing:.08em;}
@@ -386,7 +391,7 @@ dialog::backdrop{background:var(--backdrop);}
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
 <script>
-const VERSION = "shima-shima_v014";
+const VERSION = "shima-shima_v015";
 const KEY_STATE = "shima-shima_state";
 const KEY_FAVS = "shima-shima_favorites";
 const KEY_LANG = "shima-shima_lang";
@@ -395,6 +400,11 @@ const KEY_THEME = "shima-shima_theme";
 const $ = id => document.getElementById(id);
 
 const RELEASES = [
+  {v:"v015", date:"2026.06.12", text:{
+    ja:"基本12カラーバリエーションと、遊び色・逆配色を展開できるmoreボタン、3言語の配色名を追加。",
+    en:"Added 12 always-visible colorways, a more button for playful and reversed colors, and colorway names in three languages.",
+    fr:"Ajout de 12 coloris toujours visibles, d’un bouton more pour les variantes ludiques et inversées, et de noms de coloris en trois langues."
+  }},
   {v:"v014", date:"2026.06.12", text:{
     ja:"二段ヘッダー、JPN / ENG / FRA、グレースケール極細設定アイコン、ABOUT sirop、全履歴へ展開できるdevelopment journalを追加。",
     en:"Added a two-row header, JPN / ENG / FRA labels, thin grayscale icons, ABOUT sirop, and a development journal expandable to the full history.",
@@ -479,13 +489,33 @@ const MODELS = [
 ];
 
 const PALETTES = [
-  {base:"#F2EDE0", stripe:"#1F2A44"},
-  {base:"#F1ECE0", stripe:"#1B1B1B"},
-  {base:"#FFFFFF", stripe:"#1F2A44"},
-  {base:"#FFFFFF", stripe:"#B4302E"},
-  {base:"#1B1B1B", stripe:"#F5F5F0"},
-  {base:"#FFFFFF", stripe:"#C3A6DE"},
-  {base:"#B8B4AC", stripe:"#2E3440"}
+  {base:"#F2EDE0", stripe:"#1F2A44", name:"ecruNavy"},
+  {base:"#F2EDE0", stripe:"#B4302E", name:"ecruRed"},
+  {base:"#F2EDE0", stripe:"#36598A", name:"ecruBlue"},
+  {base:"#F1ECE0", stripe:"#1B1B1B", name:"ecruBlack"},
+  {base:"#FFFFFF", stripe:"#1F2A44", name:"whiteNavy"},
+  {base:"#FFFFFF", stripe:"#B4302E", name:"whiteRed"},
+  {base:"#FFFFFF", stripe:"#36598A", name:"whiteBlue"},
+  {base:"#1B1B1B", stripe:"#F5F5F0", name:"blackEcru"},
+  {base:"#B8B4AC", stripe:"#2E3440", name:"grayNavy"},
+  {base:"#F6E8C9", stripe:"#4A3328", name:"creamBrown"},
+  {base:"#F6E8C9", stripe:"#79AECA", name:"creamLightBlue"},
+  {base:"#FFFFFF", stripe:"#C3A6DE", name:"whiteLavender"}
+];
+
+const MORE_PALETTES = [
+  {base:"#FFFFFF", stripe:"#1B1B1B", name:"whiteBlack"},
+  {base:"#F2EDE0", stripe:"#2E5E4E", name:"ecruGreen"},
+  {base:"#F2EDE0", stripe:"#B87D3B", name:"ecruOrange"},
+  {base:"#F2EDE0", stripe:"#C66B85", name:"ecruPink"},
+  {base:"#F6E8C9", stripe:"#668B6A", name:"creamGreen"},
+  {base:"#F6E8C9", stripe:"#7F3345", name:"creamBurgundy"},
+  {base:"#D8EAF1", stripe:"#1F2A44", name:"lightBlueNavy"},
+  {base:"#F3E3E3", stripe:"#8A4B6B", name:"pinkBurgundy"},
+  {base:"#E3EAE3", stripe:"#1F2A44", name:"sageNavy"},
+  {base:"#1F2A44", stripe:"#F2EDE0", name:"navyEcru"},
+  {base:"#B4302E", stripe:"#FFFFFF", name:"redWhite"},
+  {base:"#4A3328", stripe:"#F6E8C9", name:"brownCream"}
 ];
 
 const TODAY_LIGHTS = ["#F2EDE0","#F5F1E6","#FFFFFF","#F1ECE0","#E8D9B0","#B8B4AC","#F3E3E3","#E3EAE3"];
@@ -520,6 +550,15 @@ ja:{
   empty:"まだお気に入りがありません。simulatorで「お気に入りに登録」を。",
   del:"削除", rename:"名前を変更",
   myColorAdd:"いまの配色をマイカラーに登録", myColorTip:"クリックで適用 / ダブルクリックで削除",
+  moreColors:"more ＋", lessColors:"close −",
+  colorways:{
+    ecruNavy:"生成り × 紺", ecruRed:"生成り × 赤", ecruBlue:"生成り × 青", ecruBlack:"生成り × 黒",
+    whiteNavy:"白 × 紺", whiteRed:"白 × 赤", whiteBlue:"白 × 青", blackEcru:"黒 × 生成り",
+    grayNavy:"グレー × 紺", creamBrown:"クリーム × 茶", creamLightBlue:"クリーム × 水色", whiteLavender:"白 × ラベンダー",
+    whiteBlack:"白 × 黒", ecruGreen:"生成り × 緑", ecruOrange:"生成り × オレンジ", ecruPink:"生成り × ピンク",
+    creamGreen:"クリーム × 緑", creamBurgundy:"クリーム × バーガンディ", lightBlueNavy:"水色 × 紺", pinkBurgundy:"淡いピンク × バーガンディ",
+    sageNavy:"セージ × 紺", navyEcru:"紺 × 生成り", redWhite:"赤 × 白", brownCream:"茶 × クリーム"
+  },
   sharedTitle:"共有されたお気に入り", importFavs:"自分のfavoritesに取り込む", close:"閉じる",
   posterTitle:"わたしの好きな shima-shima",
   brandHint:"ボーダーシャツシミュレーター",
@@ -611,6 +650,15 @@ en:{
   empty:"No favorites yet — save one from the simulator.",
   del:"delete", rename:"rename",
   myColorAdd:"save current colors", myColorTip:"click to apply / double-click to remove",
+  moreColors:"more ＋", lessColors:"close −",
+  colorways:{
+    ecruNavy:"ecru × navy", ecruRed:"ecru × red", ecruBlue:"ecru × blue", ecruBlack:"ecru × black",
+    whiteNavy:"white × navy", whiteRed:"white × red", whiteBlue:"white × blue", blackEcru:"black × ecru",
+    grayNavy:"gray × navy", creamBrown:"cream × brown", creamLightBlue:"cream × light blue", whiteLavender:"white × lavender",
+    whiteBlack:"white × black", ecruGreen:"ecru × green", ecruOrange:"ecru × orange", ecruPink:"ecru × pink",
+    creamGreen:"cream × green", creamBurgundy:"cream × burgundy", lightBlueNavy:"light blue × navy", pinkBurgundy:"pale pink × burgundy",
+    sageNavy:"sage × navy", navyEcru:"navy × ecru", redWhite:"red × white", brownCream:"brown × cream"
+  },
   sharedTitle:"shared favorites", importFavs:"add to my favorites", close:"close",
   posterTitle:"my favorite shima-shima",
   brandHint:"border shirt simulator",
@@ -702,6 +750,15 @@ fr:{
   empty:"Pas encore de favoris — enregistrez-en depuis le simulateur.",
   del:"supprimer", rename:"renommer",
   myColorAdd:"garder ces couleurs", myColorTip:"clic pour appliquer / double-clic pour retirer",
+  moreColors:"plus ＋", lessColors:"fermer −",
+  colorways:{
+    ecruNavy:"écru × marine", ecruRed:"écru × rouge", ecruBlue:"écru × bleu", ecruBlack:"écru × noir",
+    whiteNavy:"blanc × marine", whiteRed:"blanc × rouge", whiteBlue:"blanc × bleu", blackEcru:"noir × écru",
+    grayNavy:"gris × marine", creamBrown:"crème × brun", creamLightBlue:"crème × bleu ciel", whiteLavender:"blanc × lavande",
+    whiteBlack:"blanc × noir", ecruGreen:"écru × vert", ecruOrange:"écru × orange", ecruPink:"écru × rose",
+    creamGreen:"crème × vert", creamBurgundy:"crème × bordeaux", lightBlueNavy:"bleu ciel × marine", pinkBurgundy:"rose pâle × bordeaux",
+    sageNavy:"sauge × marine", navyEcru:"marine × écru", redWhite:"rouge × blanc", brownCream:"brun × crème"
+  },
   sharedTitle:"favoris partagés", importFavs:"ajouter à mes favoris", close:"fermer",
   posterTitle:"mon shima-shima préféré",
   brandHint:"simulateur de marinières",
@@ -777,6 +834,7 @@ let captionOverride = null;
 let dragId = null;
 let theme = "system";
 let releaseExpanded = false;
+let moreColorsExpanded = false;
 
 function t(){ return I18N[lang]; }
 const collator = new Intl.Collator(["ja"], {numeric:true, sensitivity:"base"});
@@ -866,7 +924,8 @@ function markPalette(){
 
   if (isMulti) {
     const stripes = Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value.toUpperCase());
-    document.querySelectorAll("#palettes button").forEach((btn, i) => {
+    document.querySelectorAll("#palettes button[data-multi-index]").forEach(btn => {
+      const i = Number(btn.dataset.multiIndex);
       const p = MULTI_PALETTES[i];
       if(!p) return;
       const baseMatch = p.base.toUpperCase() === b;
@@ -875,13 +934,17 @@ function markPalette(){
     });
   } else {
     const s = $("stripe").value.toUpperCase();
-    const mark = (sel, arr) => document.querySelectorAll(sel).forEach((btn, i) => {
+    const mark = (sel, arr) => document.querySelectorAll(sel).forEach(btn => {
+      const i = Number(btn.dataset.paletteIndex);
       const p = arr[i];
       if(!p) return;
       btn.classList.toggle("on", p.base.toUpperCase() === b && p.stripe.toUpperCase() === s);
     });
-    mark("#palettes button", PALETTES);
-    mark("#myColors button:not(.addc)", myColors);
+    mark("#palettes button[data-palette-index]", [...PALETTES, ...MORE_PALETTES]);
+    document.querySelectorAll("#myColors button[data-palette-index]").forEach((btn, i) => {
+      const p = myColors[i];
+      btn.classList.toggle("on", !!p && p.base.toUpperCase() === b && p.stripe.toUpperCase() === s);
+    });
   }
 }
 
@@ -930,8 +993,9 @@ function renderPalettes(){
   const isMulti = currentModel.id === "bee-multi";
 
   if (isMulti) {
-    MULTI_PALETTES.forEach(p => {
+    MULTI_PALETTES.forEach((p, i) => {
       const btn = document.createElement("button");
+      btn.dataset.multiIndex = i;
       btn.style.background = `conic-gradient(
         ${p.stripes[0]} 0 60deg, 
         ${p.stripes[1]} 60deg 120deg, 
@@ -953,10 +1017,13 @@ function renderPalettes(){
       palBox.appendChild(btn);
     });
   } else {
-    PALETTES.forEach(p => {
+    const visiblePalettes = moreColorsExpanded ? [...PALETTES, ...MORE_PALETTES] : PALETTES;
+    visiblePalettes.forEach((p, i) => {
       const btn = document.createElement("button");
+      btn.dataset.paletteIndex = i;
       btn.style.background = `linear-gradient(135deg, ${p.base} 50%, ${p.stripe} 50%)`;
-      btn.setAttribute("aria-label", `${p.base} / ${p.stripe}`);
+      btn.title = t().colorways[p.name];
+      btn.setAttribute("aria-label", t().colorways[p.name]);
       btn.addEventListener("click", () => {
         $("base").value = p.base;
         $("stripe").value = p.stripe;
@@ -965,6 +1032,17 @@ function renderPalettes(){
       });
       palBox.appendChild(btn);
     });
+    const more = document.createElement("button");
+    more.className = "more-toggle";
+    more.textContent = moreColorsExpanded ? t().lessColors : t().moreColors;
+    more.setAttribute("aria-expanded", String(moreColorsExpanded));
+    more.setAttribute("aria-label", more.textContent);
+    more.addEventListener("click", () => {
+      moreColorsExpanded = !moreColorsExpanded;
+      renderPalettes();
+      markPalette();
+    });
+    palBox.appendChild(more);
   }
 }
 
@@ -973,6 +1051,7 @@ function renderMyColors(){
   box.innerHTML = "";
   myColors.forEach((p, i) => {
     const btn = document.createElement("button");
+    btn.dataset.paletteIndex = i;
     btn.style.background = `linear-gradient(135deg, ${p.base} 50%, ${p.stripe} 50%)`;
     btn.title = t().myColorTip;
     btn.setAttribute("aria-label", `${p.base} / ${p.stripe}`);
@@ -1597,6 +1676,7 @@ function applyLang(){
   buildModelSel();
   buildSortSel();
   buildThemeSel();
+  renderPalettes();
   renderMyColors();
   $("modelNote").textContent = d.notes[currentModel.id];
   $("modelName").textContent = captionOverride || d.models[currentModel.id];
