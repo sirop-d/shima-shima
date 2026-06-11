@@ -6,13 +6,13 @@
 <title>shima-shima</title>
 <!--
   shima-shima — border tee simulator
-  @version v002
+  @version v003
   担当AI名: Claude / クー
   更新履歴（最新3件のみ）:
-  - v002 (20260611) UI全面刷新。エディトリアル調（余白・タイポグラフィ・hairline罫線）へ。
-    ヘッダーをshima-shimaのみに簡素化、カード/ピルUI・絵文字を廃止、
-    Tシャツシルエットを長袖に変更、スライダー/スウォッチをカスタム描画
-  - v001 (20260611) 初版。モデル×配色の2軸プリセット、縞調整、地色線色入れ替え、読みものページ
+  - v003 (20260611) モデル選択をプルダウン化、右上に日英仏切替、モデル名刷新（蜂ラッセル風/MJ風/UNCL風）、
+    favoritesタブ新設（★0-5評価・★順/新旧ソート・削除・呼び出し）、フッターを shima-shima by sirop に
+  - v002 (20260611) UI全面刷新。エディトリアル調へ。長袖シルエット化、カスタムスライダー
+  - v001 (20260611) 初版。モデル×配色プリセット、縞調整、入れ替え、読みものページ
 -->
 <style>
 :root{
@@ -24,21 +24,29 @@
 html{background:var(--bg);}
 body{font-family:var(--sans); color:var(--ink); line-height:1.8; -webkit-font-smoothing:antialiased;}
 button{background:none; border:none; cursor:pointer; font:inherit; color:inherit; padding:0;}
+select{
+  appearance:none; -webkit-appearance:none; border:none; background:transparent;
+  font:inherit; color:var(--ink); cursor:pointer; border-radius:0;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="5"><path d="M0 0l4 5 4-5z" fill="%238e8a82"/></svg>');
+  background-repeat:no-repeat; background-position:right center; padding-right:18px;
+}
 header{
   display:flex; align-items:baseline; justify-content:space-between;
   padding:34px 48px 30px; border-bottom:1px solid var(--hairline);
 }
 .wordmark{font-size:13px; letter-spacing:.38em; font-weight:400;}
-nav{display:flex; gap:28px;}
+.hright{display:flex; align-items:baseline; gap:30px;}
+nav{display:flex; gap:26px;}
 nav button{
   font-size:11px; letter-spacing:.22em; color:var(--gray);
   padding-bottom:3px; border-bottom:1px solid transparent;
 }
 nav button.on{color:var(--ink); border-bottom-color:var(--ink);}
+#langSel{font-size:10px; letter-spacing:.2em; color:var(--gray);}
 main{max-width:1020px; margin:0 auto; padding:64px 48px 80px;}
 .sim{display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:72px; align-items:start;}
 @media (max-width:760px){
-  header{padding:24px 24px 20px;}
+  header{padding:24px 24px 20px; flex-wrap:wrap; gap:14px;}
   main{padding:40px 24px 64px;}
   .sim{grid-template-columns:1fr; gap:48px;}
 }
@@ -46,23 +54,22 @@ main{max-width:1020px; margin:0 auto; padding:64px 48px 80px;}
 .caption{text-align:center; margin-top:28px;}
 .caption .name{font-family:var(--serif); font-size:15px; letter-spacing:.08em;}
 .caption .spec{font-size:10px; letter-spacing:.3em; color:var(--faint); margin-top:6px;}
+#addFav{
+  font-size:10px; letter-spacing:.22em; color:var(--gray); margin-top:20px;
+  border-bottom:1px solid transparent; padding-bottom:2px;
+}
+#addFav:hover{color:var(--ink); border-bottom-color:var(--ink);}
 .ctrl h2{
   font-size:10px; font-weight:400; letter-spacing:.3em; color:var(--gray);
   text-transform:uppercase; margin-bottom:14px;
 }
 .ctrl section{padding:26px 0; border-bottom:1px solid var(--hairline);}
 .ctrl section:first-child{padding-top:0;}
-.models button{
-  display:block; width:100%; text-align:left; font-size:13.5px; letter-spacing:.04em;
-  color:var(--gray); padding:5px 0 5px 26px; position:relative; transition:color .15s;
+#modelSel{
+  width:100%; font-size:13.5px; letter-spacing:.05em;
+  border-bottom:1px solid var(--hairline); padding:6px 18px 6px 0;
 }
-.models button::before{
-  content:"\2014"; position:absolute; left:0; opacity:0; transition:opacity .15s;
-}
-.models button:hover{color:var(--ink);}
-.models button.on{color:var(--ink);}
-.models button.on::before{opacity:1;}
-.model-note{font-size:11px; color:var(--faint); margin-top:12px; padding-left:26px; line-height:1.7;}
+.model-note{font-size:11px; color:var(--faint); margin-top:12px; line-height:1.7;}
 .dots{display:flex; flex-wrap:wrap; gap:14px; padding:2px;}
 .dots button{
   width:22px; height:22px; border-radius:50%; border:1px solid var(--hairline);
@@ -96,6 +103,22 @@ input[type=range]::-moz-range-thumb{
   width:11px; height:11px; border-radius:50%; background:var(--ink); border:none; cursor:pointer;
 }
 .footnote{font-size:10.5px; color:var(--faint); line-height:1.7; padding-top:24px;}
+.favhead{display:flex; align-items:baseline; justify-content:space-between; max-width:720px; margin:0 auto 8px;}
+.favhead h2{font-size:10px; font-weight:400; letter-spacing:.3em; color:var(--gray); text-transform:uppercase;}
+#sortSel{font-size:10.5px; letter-spacing:.12em; color:var(--gray);}
+#favList{max-width:720px; margin:0 auto;}
+.fav{display:flex; align-items:center; gap:20px; padding:20px 0; border-bottom:1px solid var(--hairline);}
+.fav .sw{width:46px; height:46px; border:1px solid var(--hairline); cursor:pointer; flex-shrink:0;}
+.fav .info{flex:1; min-width:0; cursor:pointer;}
+.fav .nm{font-size:12.5px; letter-spacing:.1em;}
+.fav .sp{font-size:9.5px; letter-spacing:.24em; color:var(--faint); margin-top:3px;}
+.fav .dt{font-size:9.5px; letter-spacing:.12em; color:var(--faint); margin-top:3px;}
+.fav .stars{display:flex; gap:3px;}
+.fav .stars button{font-size:13px; color:var(--faint); line-height:1;}
+.fav .stars button.on{color:var(--ink);}
+.fav .del{font-size:14px; color:var(--faint); padding:0 2px;}
+.fav .del:hover{color:var(--ink);}
+.empty{max-width:720px; margin:48px auto; text-align:center; font-size:12px; color:var(--faint); letter-spacing:.08em;}
 article{max-width:620px; margin:0 auto;}
 article .lede{font-family:var(--serif); font-size:16px; line-height:2.2; margin-bottom:48px;}
 article h2{
@@ -121,16 +144,24 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
 <body>
 <header>
   <p class="wordmark">shima-shima</p>
-  <nav>
-    <button id="tabSim" class="on">simulator</button>
-    <button id="tabRead">journal</button>
-  </nav>
+  <div class="hright">
+    <nav>
+      <button id="tabSim" class="on" data-view="sim">simulator</button>
+      <button id="tabFav" data-view="fav">favorites</button>
+      <button id="tabRead" data-view="jour">journal</button>
+    </nav>
+    <select id="langSel" aria-label="language">
+      <option value="ja">JA</option>
+      <option value="en">EN</option>
+      <option value="fr">FR</option>
+    </select>
+  </div>
 </header>
 
 <main>
 <section id="viewSim" class="sim">
   <div class="stage">
-    <svg viewBox="0 0 460 460" role="img" aria-label="ボーダーTシャツのプレビュー">
+    <svg viewBox="0 0 460 460" role="img" aria-label="border tee preview">
       <defs>
         <pattern id="st" patternUnits="userSpaceOnUse" width="10" height="16">
           <rect id="pBase" width="10" height="16" fill="#F2EDE0"></rect>
@@ -148,115 +179,270 @@ footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint)
       <path d="M185,82 Q230,106 275,82" fill="none" stroke="#d8d3c8" stroke-width="1"></path>
     </svg>
     <div class="caption">
-      <p class="name" id="modelName">SJウエッソン風</p>
-      <p class="spec" id="specLine">STRIPE 8 · GAP 8 · PLAIN 0</p>
+      <p class="name" id="modelName"></p>
+      <p class="spec" id="specLine"></p>
+      <button id="addFav"></button>
     </div>
   </div>
 
   <div class="ctrl">
     <section>
-      <h2>model</h2>
-      <div class="models" id="models"></div>
+      <h2 id="hModel">model</h2>
+      <select id="modelSel"></select>
       <p class="model-note" id="modelNote"></p>
     </section>
 
     <section>
-      <h2>colorway</h2>
+      <h2 id="hColor">colorway</h2>
       <div class="dots" id="palettes"></div>
       <div class="pickers">
-        <label>地色</label><input type="color" id="base" value="#F2EDE0">
-        <label>線色</label><input type="color" id="stripe" value="#1F2A44">
-        <button id="swap">入れ替え</button>
+        <label id="lbBase" for="base"></label><input type="color" id="base" value="#F2EDE0">
+        <label id="lbStripe" for="stripe"></label><input type="color" id="stripe" value="#1F2A44">
+        <button id="swap"></button>
       </div>
     </section>
 
     <section style="border-bottom:none;">
-      <h2>stripe</h2>
+      <h2 id="hStripe">stripe</h2>
       <div class="slider-row">
-        <label>線の太さ</label>
+        <label id="lbSw" for="sw"></label>
         <input type="range" id="sw" min="2" max="20" step="1" value="8">
         <output id="swOut">8</output>
       </div>
       <div class="slider-row">
-        <label>地の間隔</label>
+        <label id="lbGw" for="gw"></label>
         <input type="range" id="gw" min="2" max="32" step="1" value="8">
         <output id="gwOut">8</output>
       </div>
       <div class="slider-row">
-        <label>胸元の無地</label>
+        <label id="lbPl" for="pl"></label>
         <input type="range" id="pl" min="0" max="160" step="1" value="0">
         <output id="plOut">0</output>
       </div>
-      <p class="footnote">プリセットは実在の名作を観察した「〜風」の再現です。特定ブランドの公式設定ではありません。</p>
+      <p class="footnote" id="footnote"></p>
     </section>
   </div>
 </section>
 
-<section id="viewRead" class="hidden">
-  <article>
-    <p class="lede">ボーダーTは、ただの柄ではなく、海で働く人の背中から暮らしの定番へと歩いてきた「線の服」。その来歴を、歩く速度で。</p>
+<section id="viewFav" class="hidden">
+  <div class="favhead">
+    <h2>favorites</h2>
+    <select id="sortSel"></select>
+  </div>
+  <div id="favList"></div>
+</section>
 
-    <h2>origins — 成り立ち</h2>
-    <p>起源は16世紀頃、スペイン・バスク地方の船乗りたちが着ていた手編みのウールやコットンのセーターが縞模様だったことにあるといわれる。日本で「バスクシャツ」と呼ばれるのはこの説に由来する。</p>
-    <p>その後、フランス・ノルマンディーやブルターニュの船乗りたちが、視界の悪い海上でも人を見つけやすいように縞のシャツを着るようになり、これがフランス海軍の水兵の制服「マリニエール」へとつながった。海に落ちた仲間を見つけるための実用の柄が出発点、というのがボーダーの面白いところ。</p>
-
-    <h2>into fashion — モードへ</h2>
-    <p>1910年代、ココ・シャネルが漁師や水兵の装いに着想を得たマリンルックを打ち出し、労働着だったボーダーがモードの世界に持ち込まれたといわれる。1923年には芸術家の着用をきっかけに欧米のリゾート地で大流行し、以降「リゾート・休日・自由」のイメージをまとった定番になった。</p>
-    <p>日本では1960年代にセントジェームスが上陸し、1980〜1990年代のマリンスタイル・フレンチカジュアルのブームで一気に広まった。</p>
-
-    <h2>icons — ボーダーを愛した人々</h2>
-    <ul class="people">
-      <li><span class="who">パブロ・ピカソ</span><span class="what">ドアノー撮影の「パンの指」の写真があまりに有名。黒（紺）×生成の太めボーダーはいまも「ピカソ配色」と呼ばれる。</span></li>
-      <li><span class="who">ジェームス・ディーン</span><span class="what">反骨のアイコンが着ることで、マリンの柄に都会の顔が加わった。</span></li>
-      <li><span class="who">アンディ・ウォーホル</span><span class="what">サングラスにボーダーがほぼ制服。アートとボーダーの結びつきを決定づけた。</span></li>
-      <li><span class="who">ココ・シャネル</span><span class="what">着た人であると同時に、ボーダーをモードに引き上げた張本人。</span></li>
-      <li><span class="who">ジーン・セバーグ、ブリジット・バルドー</span><span class="what">1960年代、映画とともにフレンチシックの象徴に。</span></li>
-      <li><span class="who">ジャン＝ポール・ゴルチエ</span><span class="what">ボーダーを自身のアイデンティティとしてコレクションの主役に据えた。</span></li>
-    </ul>
-
-    <h2>timeline — ブランド小年表</h2>
-    <ul class="tl">
-      <li><span class="y">1889</span><span class="t">セントジェームス創業（モン・サン＝ミッシェル近郊の町サン・ジェームス）。代表作はウエッソン、ナバル</span></li>
-      <li><span class="y">1936</span><span class="t">ル・ミノア誕生（ブルターニュ）。生地から縫製までフランス自社工場</span></li>
-      <li><span class="y">1939</span><span class="t">オーチバル創業。フランス海軍に制服を納めた歴史を持つ</span></li>
-      <li><span class="y">1960s</span><span class="t">セントジェームスが日本上陸</span></li>
-      <li><span class="y">1980–90s</span><span class="t">日本のマリンブームの火付け役に。以降、無印良品やユニクロが定番化し、誰の暮らしにもボーダーがある風景になった</span></li>
-    </ul>
-
-    <h2>references — 参考</h2>
-    <p class="src"><a href="https://roco2web.com/blogs/koromobito/20240726_165" target="_blank" rel="noopener">世界中で愛され続ける“ボーダー”の魅力｜ROCOCO ONLINE STORE</a><br>
-    年代や逸話には諸説あるものが含まれます。本ページは「〜といわれる」の粒度で楽しむ読みものです。</p>
-  </article>
+<section id="viewJour" class="hidden">
+  <article id="journal"></article>
 </section>
 </main>
 
-<footer>shima-shima</footer>
+<footer>shima-shima by sirop</footer>
 
 <script>
-const VERSION = "ボーダーTシミュレーター_v002";
+const VERSION = "ボーダーTシミュレーター_v003";
+const KEY_STATE = "shima-shima_state";
+const KEY_FAVS = "shima-shima_favorites";
+const KEY_LANG = "shima-shima_lang";
 const $ = id => document.getElementById(id);
 
 const MODELS = [
-  {id:"sj-ouessant", name:"SJウエッソン風", note:"セントジェームスの定番。厚手・等ピッチ・全面ボーダー。", sw:8, gw:8, pl:0, base:"#F2EDE0", stripe:"#1F2A44"},
-  {id:"sj-naval", name:"SJナバル風", note:"胸元が無地のタイプ。細めの縞が下半分に入る。", sw:6, gw:12, pl:80, base:"#F5F1E6", stripe:"#1F2A44"},
-  {id:"sj-morlaix", name:"SJモーレ風", note:"薄手・細ピッチ。春夏向けの軽い表情。", sw:4, gw:9, pl:0, base:"#F7F4EA", stripe:"#27324F"},
-  {id:"orcival", name:"オーチバル ラッセル風", note:"目の詰まった生地に細めの縞。間隔広めで上品。", sw:6, gw:13, pl:0, base:"#EFE9DA", stripe:"#27324F"},
-  {id:"muji", name:"無印良品風", note:"太番手の白地。日常着のすっきりしたボーダー。", sw:9, gw:14, pl:0, base:"#FFFFFF", stripe:"#2B3A55"},
-  {id:"uniqlo", name:"ユニクロ風", note:"標準的なピッチのクルーT系。気軽な普段着。", sw:7, gw:12, pl:0, base:"#FFFFFF", stripe:"#233A5C"},
-  {id:"original", name:"オリジナル", note:"自由設定。スライダーと色で好きな1枚を。", sw:8, gw:10, pl:0, base:"#FFFFFF", stripe:"#C3A6DE"}
+  {id:"sj-ouessant", sw:8, gw:8, pl:0, base:"#F2EDE0", stripe:"#1F2A44"},
+  {id:"sj-naval", sw:6, gw:12, pl:80, base:"#F5F1E6", stripe:"#1F2A44"},
+  {id:"sj-morlaix", sw:4, gw:9, pl:0, base:"#F7F4EA", stripe:"#27324F"},
+  {id:"bee-russell", sw:6, gw:13, pl:0, base:"#EFE9DA", stripe:"#27324F"},
+  {id:"mj", sw:9, gw:14, pl:0, base:"#FFFFFF", stripe:"#2B3A55"},
+  {id:"uncl", sw:7, gw:12, pl:0, base:"#FFFFFF", stripe:"#233A5C"},
+  {id:"original", sw:8, gw:10, pl:0, base:"#FFFFFF", stripe:"#C3A6DE"}
 ];
 
 const PALETTES = [
-  {name:"生成×マリン", base:"#F2EDE0", stripe:"#1F2A44"},
-  {name:"ピカソ配色", base:"#F1ECE0", stripe:"#1B1B1B"},
-  {name:"白×マリン", base:"#FFFFFF", stripe:"#1F2A44"},
-  {name:"白×赤", base:"#FFFFFF", stripe:"#B4302E"},
-  {name:"黒×白", base:"#1B1B1B", stripe:"#F5F5F0"},
-  {name:"ラベンダー×白", base:"#FFFFFF", stripe:"#C3A6DE"},
-  {name:"杢グレー×紺", base:"#B8B4AC", stripe:"#2E3440"}
+  {base:"#F2EDE0", stripe:"#1F2A44"},
+  {base:"#F1ECE0", stripe:"#1B1B1B"},
+  {base:"#FFFFFF", stripe:"#1F2A44"},
+  {base:"#FFFFFF", stripe:"#B4302E"},
+  {base:"#1B1B1B", stripe:"#F5F5F0"},
+  {base:"#FFFFFF", stripe:"#C3A6DE"},
+  {base:"#B8B4AC", stripe:"#2E3440"}
 ];
 
+const I18N = {
+ja:{
+  nav:["simulator","favorites","journal"],
+  hModel:"model", hColor:"colorway", hStripe:"stripe",
+  models:{
+    "sj-ouessant":"SJウエッソン風", "sj-naval":"SJナバル風", "sj-morlaix":"SJモーレ風",
+    "bee-russell":"蜂 ラッセル風", "mj":"MJ風", "uncl":"UNCL風", "original":"オリジナル"
+  },
+  notes:{
+    "sj-ouessant":"セントジェームスの定番。厚手・等ピッチ・全面ボーダー。",
+    "sj-naval":"胸元が無地のタイプ。細めの縞が下半分に入る。",
+    "sj-morlaix":"薄手・細ピッチ。春夏向けの軽い表情。",
+    "bee-russell":"目の詰まった生地に細めの縞。間隔広めで上品。",
+    "mj":"太番手の白地。日常着のすっきりしたボーダー。",
+    "uncl":"標準的なピッチのクルーT系。気軽な普段着。",
+    "original":"自由設定。スライダーと色で好きな1枚を。"
+  },
+  base:"地色", stripe:"線色", swap:"入れ替え",
+  sw:"線の太さ", gw:"地の間隔", pl:"胸元の無地",
+  footnote:"プリセットは実在の名作を観察した「〜風」の再現です。特定ブランドの公式設定ではありません。",
+  addFav:"＋ お気に入りに登録", added:"登録しました",
+  sorts:["★順","新しい順","古い順"],
+  empty:"まだお気に入りがありません。simulatorで「お気に入りに登録」を。",
+  del:"削除",
+  journal:{
+    lede:"ボーダーTは、ただの柄ではなく、海で働く人の背中から暮らしの定番へと歩いてきた「線の服」。その来歴を、歩く速度で。",
+    sections:[
+      {h:"origins — 成り立ち", ps:[
+        "起源は16世紀頃、スペイン・バスク地方の船乗りたちが着ていた手編みのウールやコットンのセーターが縞模様だったことにあるといわれる。日本で「バスクシャツ」と呼ばれるのはこの説に由来する。",
+        "その後、フランス・ノルマンディーやブルターニュの船乗りたちが、視界の悪い海上でも人を見つけやすいように縞のシャツを着るようになり、これがフランス海軍の水兵の制服「マリニエール」へとつながった。海に落ちた仲間を見つけるための実用の柄が出発点、というのがボーダーの面白いところ。"
+      ]},
+      {h:"into fashion — モードへ", ps:[
+        "1910年代、ココ・シャネルが漁師や水兵の装いに着想を得たマリンルックを打ち出し、労働着だったボーダーがモードの世界に持ち込まれたといわれる。1923年には芸術家の着用をきっかけに欧米のリゾート地で大流行し、以降「リゾート・休日・自由」のイメージをまとった定番になった。",
+        "日本では1960年代にセントジェームスが上陸し、1980〜1990年代のマリンスタイル・フレンチカジュアルのブームで一気に広まった。"
+      ]}
+    ],
+    iconsH:"icons — ボーダーを愛した人々",
+    icons:[
+      ["パブロ・ピカソ","ドアノー撮影の「パンの指」の写真があまりに有名。黒（紺）×生成の太めボーダーはいまも「ピカソ配色」と呼ばれる。"],
+      ["ジェームス・ディーン","反骨のアイコンが着ることで、マリンの柄に都会の顔が加わった。"],
+      ["アンディ・ウォーホル","サングラスにボーダーがほぼ制服。アートとボーダーの結びつきを決定づけた。"],
+      ["ココ・シャネル","着た人であると同時に、ボーダーをモードに引き上げた張本人。"],
+      ["ジーン・セバーグ、ブリジット・バルドー","1960年代、映画とともにフレンチシックの象徴に。"],
+      ["ジャン＝ポール・ゴルチエ","ボーダーを自身のアイデンティティとしてコレクションの主役に据えた。"]
+    ],
+    tlH:"timeline — 小さな年表",
+    tl:[
+      ["1889","セントジェームス創業（モン・サン＝ミッシェル近郊の町サン・ジェームス）。代表作はウエッソン、ナバル"],
+      ["1936","ル・ミノア誕生（ブルターニュ）。生地から縫製までフランス自社工場"],
+      ["1939","オーチバル創業。フランス海軍に制服を納めた歴史を持つ"],
+      ["1960s","セントジェームスが日本上陸"],
+      ["1980–90s","日本のマリンブームの火付け役に。以降、無印良品やユニクロが定番化し、誰の暮らしにもボーダーがある風景になった"]
+    ],
+    refsH:"references — 参考",
+    refs:'<a href="https://roco2web.com/blogs/koromobito/20240726_165" target="_blank" rel="noopener">世界中で愛され続ける“ボーダー”の魅力｜ROCOCO ONLINE STORE</a><br>年代や逸話には諸説あるものが含まれます。本ページは「〜といわれる」の粒度で楽しむ読みものです。'
+  }
+},
+en:{
+  nav:["simulator","favorites","journal"],
+  hModel:"model", hColor:"colorway", hStripe:"stripe",
+  models:{
+    "sj-ouessant":"SJ Ouessant", "sj-naval":"SJ Naval", "sj-morlaix":"SJ Morlaix",
+    "bee-russell":"Bee Russell", "mj":"MJ", "uncl":"UNCL", "original":"Original"
+  },
+  notes:{
+    "sj-ouessant":"The classic. Heavy jersey, even pitch, stripes all over.",
+    "sj-naval":"Plain chest, finer stripes on the lower body.",
+    "sj-morlaix":"Lightweight, fine pitch — for spring and summer.",
+    "bee-russell":"Dense fabric, fine stripes, generous spacing.",
+    "mj":"Thick-yarn white ground. A clean everyday stripe.",
+    "uncl":"Standard crew-tee pitch, easy to wear.",
+    "original":"Free settings — find your own stripe."
+  },
+  base:"ground", stripe:"stripe", swap:"swap",
+  sw:"stripe width", gw:"spacing", pl:"plain chest",
+  footnote:"Presets are observations “in the style of” beloved classics — not official specifications of any brand.",
+  addFav:"＋ save to favorites", added:"saved",
+  sorts:["by rating","newest","oldest"],
+  empty:"No favorites yet — save one from the simulator.",
+  del:"delete",
+  journal:{
+    lede:"The breton stripe is more than a pattern — a garment of lines that walked from sailors’ backs into everyday wardrobes. Its story, at walking pace.",
+    sections:[
+      {h:"origins", ps:[
+        "The origin is said to lie in the 16th century, when sailors of the Basque country wore hand-knitted wool and cotton sweaters with stripes. In Japan these shirts are still called “Basque shirts” after this theory.",
+        "Later, sailors of Normandy and Brittany took to striped shirts so that a man overboard could be spotted in poor visibility — and the stripe became the French navy’s marinière. A practical pattern for finding a fallen crewmate: that is where the border begins."
+      ]},
+      {h:"into fashion", ps:[
+        "In the 1910s Coco Chanel, inspired by fishermen and sailors, brought the working stripe into fashion. In 1923 an artist’s wearing of it set off a craze across European resorts, and the stripe came to mean leisure, holidays and freedom.",
+        "The French marine stripe reached Japan in the 1960s, and the marine style boom of the 1980s–90s made it a wardrobe standard."
+      ]}
+    ],
+    iconsH:"icons",
+    icons:[
+      ["Pablo Picasso","Doisneau’s photograph with the bread-roll fingers is unforgettable. The bold black-on-ecru stripe is still called the “Picasso colorway”."],
+      ["James Dean","When the rebel icon wore stripes, the marine pattern gained an urban face."],
+      ["Andy Warhol","Sunglasses and stripes, almost a uniform — sealing the bond between art and the border."],
+      ["Coco Chanel","A wearer, and the very person who lifted the stripe into fashion."],
+      ["Jean Seberg, Brigitte Bardot","In the 1960s, with the films of the era, the symbol of French chic."],
+      ["Jean-Paul Gaultier","Made the stripe his identity and the protagonist of his collections."]
+    ],
+    tlH:"timeline",
+    tl:[
+      ["1889","Saint James founded near Mont Saint-Michel. Known for the Ouessant and the Naval"],
+      ["1936","Le Minor born in Brittany — woven and sewn in its own French workshops"],
+      ["1939","Orcival founded; it once supplied uniforms to the French navy"],
+      ["1960s","Saint James lands in Japan"],
+      ["1980–90s","The spark of Japan’s marine boom. MUJI and UNIQLO later make the stripe an everyday standard"]
+    ],
+    refsH:"references",
+    refs:'<a href="https://roco2web.com/blogs/koromobito/20240726_165" target="_blank" rel="noopener">The charm of borders, loved around the world — ROCOCO ONLINE STORE (Japanese)</a><br>Some dates and anecdotes are debated. This page is meant to be read in the spirit of “so it is said.”'
+  }
+},
+fr:{
+  nav:["simulateur","favoris","journal"],
+  hModel:"modèle", hColor:"coloris", hStripe:"rayure",
+  models:{
+    "sj-ouessant":"SJ Ouessant", "sj-naval":"SJ Naval", "sj-morlaix":"SJ Morlaix",
+    "bee-russell":"Abeille Russell", "mj":"MJ", "uncl":"UNCL", "original":"Originale"
+  },
+  notes:{
+    "sj-ouessant":"Le grand classique. Jersey épais, rayures régulières sur tout le corps.",
+    "sj-naval":"Poitrine unie, rayures fines sur le bas.",
+    "sj-morlaix":"Léger, rayures fines — printemps-été.",
+    "bee-russell":"Tissu serré, rayures fines, espacement généreux.",
+    "mj":"Fond blanc en fil épais. Une rayure nette du quotidien.",
+    "uncl":"Rayure standard de tee-shirt, facile à porter.",
+    "original":"Réglages libres — trouvez votre propre rayure."
+  },
+  base:"fond", stripe:"rayure", swap:"inverser",
+  sw:"épaisseur", gw:"espacement", pl:"plastron uni",
+  footnote:"Les préréglages sont des observations « dans l’esprit de » classiques aimés — aucune spécification officielle d’une marque.",
+  addFav:"＋ ajouter aux favoris", added:"ajouté",
+  sorts:["par note","récents","anciens"],
+  empty:"Pas encore de favoris — enregistrez-en depuis le simulateur.",
+  del:"supprimer",
+  journal:{
+    lede:"La marinière est plus qu’un motif — un vêtement de lignes, passé du dos des marins aux garde-robes de tous les jours. Son histoire, au pas de promenade.",
+    sections:[
+      {h:"origines", ps:[
+        "L’origine remonterait au XVIe siècle, quand les marins du Pays basque portaient des tricots rayés de laine et de coton. Au Japon, on appelle encore ces hauts « chemises basques ».",
+        "Plus tard, les marins de Normandie et de Bretagne adoptèrent les rayures pour être repérés en mer par mauvaise visibilité — et la rayure devint la marinière de la Marine nationale. Un motif pratique pour retrouver un camarade tombé à l’eau : c’est là que tout commence."
+      ]},
+      {h:"vers la mode", ps:[
+        "Dans les années 1910, Coco Chanel, inspirée des pêcheurs et des marins, fait entrer la rayure ouvrière dans la mode. En 1923, portée par un artiste, elle déferle sur les stations balnéaires d’Europe et devient synonyme de vacances et de liberté.",
+        "La marinière arrive au Japon dans les années 1960 ; le boom du style marin des années 1980–90 en fait un classique du quotidien."
+      ]}
+    ],
+    iconsH:"icônes",
+    icons:[
+      ["Pablo Picasso","La photographie de Doisneau, avec les petits pains en guise de doigts, est inoubliable. La large rayure noire sur écru s’appelle encore « coloris Picasso »."],
+      ["James Dean","Porté par l’icône rebelle, le motif marin gagne un visage urbain."],
+      ["Andy Warhol","Lunettes noires et rayures, presque un uniforme — l’art et la marinière définitivement liés."],
+      ["Coco Chanel","Elle l’a portée, et c’est elle qui l’a hissée dans la mode."],
+      ["Jean Seberg, Brigitte Bardot","Dans les années 1960, avec le cinéma, symbole du chic à la française."],
+      ["Jean-Paul Gaultier","Il a fait de la rayure son identité et la protagoniste de ses collections."]
+    ],
+    tlH:"repères",
+    tl:[
+      ["1889","Fondation de Saint James, près du Mont-Saint-Michel. Célèbre pour l’Ouessant et le Naval"],
+      ["1936","Naissance de Le Minor en Bretagne — tissé et cousu dans ses ateliers français"],
+      ["1939","Fondation d’Orcival, ancien fournisseur de la Marine nationale"],
+      ["1960s","Saint James arrive au Japon"],
+      ["1980–90s","Étincelle du boom marin japonais. MUJI et UNIQLO en font ensuite un basique du quotidien"]
+    ],
+    refsH:"références",
+    refs:'<a href="https://roco2web.com/blogs/koromobito/20240726_165" target="_blank" rel="noopener">Le charme des rayures, aimées dans le monde entier — ROCOCO ONLINE STORE (en japonais)</a><br>Certaines dates et anecdotes restent discutées. Cette page se lit sur le mode du « dit-on ».'
+  }
+}
+};
+
+let lang = "ja";
 let currentModel = MODELS[0];
+let favs = [];
+let sortMode = 0;
+
+function t(){ return I18N[lang]; }
 
 function render(){
   const b = $("base").value, s = $("stripe").value;
@@ -272,8 +458,9 @@ function render(){
   $("gwOut").textContent = gw;
   $("plOut").textContent = pl;
   $("specLine").textContent = `STRIPE ${sw} · GAP ${gw} · PLAIN ${pl}`;
+  $("modelName").textContent = t().models[currentModel.id];
   markPalette();
-  save();
+  saveState();
 }
 
 function markPalette(){
@@ -284,32 +471,38 @@ function markPalette(){
   });
 }
 
-function applyModel(m){
+function applyModel(m, keepValues){
   currentModel = m;
-  $("sw").value = m.sw; $("gw").value = m.gw; $("pl").value = m.pl;
-  $("base").value = m.base; $("stripe").value = m.stripe;
-  $("modelName").textContent = m.name;
-  $("modelNote").textContent = m.note;
-  document.querySelectorAll("#models button").forEach(btn =>
-    btn.classList.toggle("on", btn.dataset.id === m.id));
+  if(!keepValues){
+    $("sw").value = m.sw; $("gw").value = m.gw; $("pl").value = m.pl;
+    $("base").value = m.base; $("stripe").value = m.stripe;
+  }
+  $("modelSel").value = m.id;
+  $("modelNote").textContent = t().notes[m.id];
   render();
 }
 
-const modelsBox = $("models");
-MODELS.forEach(m => {
-  const btn = document.createElement("button");
-  btn.textContent = m.name;
-  btn.dataset.id = m.id;
-  btn.addEventListener("click", () => applyModel(m));
-  modelsBox.appendChild(btn);
+function buildModelSel(){
+  const sel = $("modelSel");
+  sel.innerHTML = "";
+  MODELS.forEach(m => {
+    const o = document.createElement("option");
+    o.value = m.id;
+    o.textContent = t().models[m.id];
+    sel.appendChild(o);
+  });
+  sel.value = currentModel.id;
+}
+
+$("modelSel").addEventListener("change", e => {
+  applyModel(MODELS.find(m => m.id === e.target.value));
 });
 
 const palBox = $("palettes");
 PALETTES.forEach(p => {
   const btn = document.createElement("button");
-  btn.title = p.name;
-  btn.setAttribute("aria-label", p.name);
   btn.style.background = `linear-gradient(135deg, ${p.base} 50%, ${p.stripe} 50%)`;
+  btn.setAttribute("aria-label", `${p.base} / ${p.stripe}`);
   btn.addEventListener("click", () => {
     $("base").value = p.base;
     $("stripe").value = p.stripe;
@@ -327,37 +520,211 @@ $("swap").addEventListener("click", () => {
 
 ["base","stripe","sw","gw","pl"].forEach(id => $(id).addEventListener("input", render));
 
-$("tabSim").addEventListener("click", () => switchTab(true));
-$("tabRead").addEventListener("click", () => switchTab(false));
-function switchTab(sim){
-  $("viewSim").classList.toggle("hidden", !sim);
-  $("viewRead").classList.toggle("hidden", sim);
-  $("tabSim").classList.toggle("on", sim);
-  $("tabRead").classList.toggle("on", !sim);
+const VIEWS = {sim:"viewSim", fav:"viewFav", jour:"viewJour"};
+const TABS = {sim:"tabSim", fav:"tabFav", jour:"tabRead"};
+function switchTab(view){
+  Object.keys(VIEWS).forEach(v => {
+    $(VIEWS[v]).classList.toggle("hidden", v !== view);
+    $(TABS[v]).classList.toggle("on", v === view);
+  });
+  if(view === "fav") renderFavs();
+}
+Object.keys(TABS).forEach(v => $(TABS[v]).addEventListener("click", () => switchTab(v)));
+
+$("addFav").addEventListener("click", () => {
+  favs.push({
+    id: Date.now(),
+    model: currentModel.id,
+    base: $("base").value, stripe: $("stripe").value,
+    sw: +$("sw").value, gw: +$("gw").value, pl: +$("pl").value,
+    rating: 0
+  });
+  saveFavs();
+  const btn = $("addFav");
+  btn.textContent = "✓ " + t().added;
+  setTimeout(() => { btn.textContent = t().addFav; }, 1200);
+});
+
+function sortedFavs(){
+  const a = favs.slice();
+  if(sortMode === 0) a.sort((x,y) => y.rating - x.rating || y.id - x.id);
+  else if(sortMode === 1) a.sort((x,y) => y.id - x.id);
+  else a.sort((x,y) => x.id - y.id);
+  return a;
 }
 
-function save(){
+function renderFavs(){
+  const box = $("favList");
+  box.innerHTML = "";
+  if(!favs.length){
+    const p = document.createElement("p");
+    p.className = "empty";
+    p.textContent = t().empty;
+    box.appendChild(p);
+    return;
+  }
+  sortedFavs().forEach(f => {
+    const row = document.createElement("div");
+    row.className = "fav";
+
+    const sw = document.createElement("div");
+    sw.className = "sw";
+    sw.style.background = `repeating-linear-gradient(180deg, ${f.stripe} 0 ${f.sw/2}px, ${f.base} ${f.sw/2}px ${(f.sw+f.gw)/2}px)`;
+    sw.addEventListener("click", () => loadFav(f));
+
+    const info = document.createElement("div");
+    info.className = "info";
+    const d = new Date(f.id);
+    const pad = n => String(n).padStart(2,"0");
+    info.innerHTML = `<p class="nm">${t().models[f.model] || f.model}</p>
+      <p class="sp">STRIPE ${f.sw} · GAP ${f.gw} · PLAIN ${f.pl} · ${f.base.toUpperCase()} / ${f.stripe.toUpperCase()}</p>
+      <p class="dt">${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}</p>`;
+    info.addEventListener("click", () => loadFav(f));
+
+    const stars = document.createElement("div");
+    stars.className = "stars";
+    for(let i = 1; i <= 5; i++){
+      const st = document.createElement("button");
+      st.textContent = i <= f.rating ? "★" : "☆";
+      st.classList.toggle("on", i <= f.rating);
+      st.setAttribute("aria-label", `${i}`);
+      st.addEventListener("click", () => {
+        f.rating = (f.rating === i) ? 0 : i;
+        saveFavs();
+        renderFavs();
+      });
+      stars.appendChild(st);
+    }
+
+    const del = document.createElement("button");
+    del.className = "del";
+    del.textContent = "×";
+    del.title = t().del;
+    del.setAttribute("aria-label", t().del);
+    del.addEventListener("click", () => {
+      favs = favs.filter(x => x.id !== f.id);
+      saveFavs();
+      renderFavs();
+    });
+
+    row.appendChild(sw);
+    row.appendChild(info);
+    row.appendChild(stars);
+    row.appendChild(del);
+    box.appendChild(row);
+  });
+}
+
+function loadFav(f){
+  const m = MODELS.find(x => x.id === f.model) || MODELS[MODELS.length-1];
+  currentModel = m;
+  $("base").value = f.base; $("stripe").value = f.stripe;
+  $("sw").value = f.sw; $("gw").value = f.gw; $("pl").value = f.pl;
+  $("modelSel").value = m.id;
+  $("modelNote").textContent = t().notes[m.id];
+  render();
+  switchTab("sim");
+}
+
+$("sortSel").addEventListener("change", e => {
+  sortMode = +e.target.value;
+  renderFavs();
+});
+
+function buildSortSel(){
+  const sel = $("sortSel");
+  sel.innerHTML = "";
+  t().sorts.forEach((label, i) => {
+    const o = document.createElement("option");
+    o.value = i;
+    o.textContent = label;
+    sel.appendChild(o);
+  });
+  sel.value = sortMode;
+}
+
+function renderJournal(){
+  const j = t().journal;
+  let html = `<p class="lede">${j.lede}</p>`;
+  j.sections.forEach(sec => {
+    html += `<h2>${sec.h}</h2>`;
+    sec.ps.forEach(p => { html += `<p>${p}</p>`; });
+  });
+  html += `<h2>${j.iconsH}</h2><ul class="people">`;
+  j.icons.forEach(([who, what]) => {
+    html += `<li><span class="who">${who}</span><span class="what">${what}</span></li>`;
+  });
+  html += `</ul><h2>${j.tlH}</h2><ul class="tl">`;
+  j.tl.forEach(([y, txt]) => {
+    html += `<li><span class="y">${y}</span><span class="t">${txt}</span></li>`;
+  });
+  html += `</ul><h2>${j.refsH}</h2><p class="src">${j.refs}</p>`;
+  $("journal").innerHTML = html;
+}
+
+function applyLang(){
+  document.documentElement.lang = lang;
+  const d = t();
+  $("tabSim").textContent = d.nav[0];
+  $("tabFav").textContent = d.nav[1];
+  $("tabRead").textContent = d.nav[2];
+  $("hModel").textContent = d.hModel;
+  $("hColor").textContent = d.hColor;
+  $("hStripe").textContent = d.hStripe;
+  $("lbBase").textContent = d.base;
+  $("lbStripe").textContent = d.stripe;
+  $("swap").textContent = d.swap;
+  $("lbSw").textContent = d.sw;
+  $("lbGw").textContent = d.gw;
+  $("lbPl").textContent = d.pl;
+  $("footnote").textContent = d.footnote;
+  $("addFav").textContent = d.addFav;
+  buildModelSel();
+  buildSortSel();
+  $("modelNote").textContent = d.notes[currentModel.id];
+  $("modelName").textContent = d.models[currentModel.id];
+  renderJournal();
+  if(!$("viewFav").classList.contains("hidden")) renderFavs();
+  try{ localStorage.setItem(KEY_LANG, lang); }catch(e){}
+}
+
+$("langSel").addEventListener("change", e => {
+  lang = e.target.value;
+  applyLang();
+});
+
+function saveState(){
   try{
-    localStorage.setItem(VERSION, JSON.stringify({
+    localStorage.setItem(KEY_STATE, JSON.stringify({
       model: currentModel.id, base: $("base").value, stripe: $("stripe").value,
       sw: $("sw").value, gw: $("gw").value, pl: $("pl").value
     }));
   }catch(e){}
 }
-function load(){
-  try{
-    const d = JSON.parse(localStorage.getItem(VERSION));
-    if(!d) return false;
-    const m = MODELS.find(x => x.id === d.model) || MODELS[0];
-    applyModel(m);
-    $("base").value = d.base; $("stripe").value = d.stripe;
-    $("sw").value = d.sw; $("gw").value = d.gw; $("pl").value = d.pl;
-    render();
-    return true;
-  }catch(e){ return false; }
+function saveFavs(){
+  try{ localStorage.setItem(KEY_FAVS, JSON.stringify(favs)); }catch(e){}
 }
 
-if(!load()) applyModel(MODELS[0]);
+function init(){
+  try{ lang = localStorage.getItem(KEY_LANG) || "ja"; }catch(e){}
+  if(!I18N[lang]) lang = "ja";
+  $("langSel").value = lang;
+  try{ favs = JSON.parse(localStorage.getItem(KEY_FAVS)) || []; }catch(e){ favs = []; }
+  let loaded = false;
+  try{
+    const d = JSON.parse(localStorage.getItem(KEY_STATE));
+    if(d){
+      currentModel = MODELS.find(x => x.id === d.model) || MODELS[0];
+      $("base").value = d.base; $("stripe").value = d.stripe;
+      $("sw").value = d.sw; $("gw").value = d.gw; $("pl").value = d.pl;
+      loaded = true;
+    }
+  }catch(e){}
+  applyLang();
+  if(loaded) applyModel(currentModel, true);
+  else applyModel(MODELS[0]);
+}
+init();
 </script>
 </body>
 </html>
