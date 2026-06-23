@@ -6,7 +6,7 @@ A playful border T-shirt simulator for classic marine stripes and original shima
 
 ## Demo
 
-**▶ https://sirop-d.github.io/shima-shima/**
+**▶ https://sirop.jp/shima-shima/**
 
 ブラウザでそのまま遊べます。 / Play directly in your browser. / Jouez directement dans votre navigateur.
 

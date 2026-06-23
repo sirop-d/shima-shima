@@ -1,0 +1,1820 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>shima-shima</title>
+<meta property="og:title" content="shima-shima">
+<meta property="og:description" content="A playful border T-shirt simulator for classic marine stripes and original shima-shima designs.">
+<meta property="og:image" content="https://sirop-d.github.io/shima-shima/assets/ogp.png">
+<meta property="og:url" content="https://sirop-d.github.io/shima-shima/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<!--
+  shima-shima — border tee simulator
+  @version v015
+  担当AI名: Codex / コウ
+  更新履歴（最新3件のみ）:
+  - v015 (20260612) 基本12カラーバリエーションとmore展開、日英仏の配色名ツールチップを追加
+  - v014 (20260612) 二段ヘッダー、JPN/ENG/FRA、極細設定アイコン、ABOUT sirop、全履歴へ展開できるdevelopment journalを追加
+  - v013 (20260612) ライト・ダーク・システム設定を追加。ロゴの説明表示とsimulator導線、shima-shimaタブの説明強化、フッター版情報ダイアログを3言語対応
+-->
+<style>
+:root{
+  --bg:#faf9f6; --ink:#1c1b19; --gray:#8e8a82; --faint:#b8b4aa; --hairline:#e3e0d8;
+  --panel:#f3f1eb; --backdrop:rgba(28,27,25,.32);
+  --serif:"Hiragino Mincho ProN","Yu Mincho",Georgia,serif;
+  --sans:"Helvetica Neue",Helvetica,"Hiragino Sans",Arial,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#171715; --ink:#f1efe9; --gray:#aaa69d; --faint:#77736c; --hairline:#393733;
+  --panel:#22211e; --backdrop:rgba(0,0,0,.62);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{background:var(--bg);}
+body{font-family:var(--sans); color:var(--ink); background:var(--bg); line-height:1.8; -webkit-font-smoothing:antialiased; transition:background-color .2s,color .2s;}
+button{background:none; border:none; cursor:pointer; font:inherit; color:inherit; padding:0;}
+select{
+  appearance:none; -webkit-appearance:none; border:none; background:transparent;
+  font:inherit; color:var(--ink); cursor:pointer; border-radius:0;
+  background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="5"><path d="M0 0l4 5 4-5z" fill="%238e8a82"/></svg>');
+  background-repeat:no-repeat; background-position:right center; padding-right:18px;
+}
+header{
+  border-bottom:1px solid var(--hairline);
+}
+.header-main{
+  display:flex; align-items:baseline; justify-content:space-between;
+  padding:34px 48px 30px; border-bottom:1px solid var(--hairline);
+}
+.brand{display:flex; align-items:baseline; gap:12px; text-align:left; white-space:nowrap;}
+.wordmark{font-size:13px; letter-spacing:.38em; font-weight:400;}
+.brand-hint{
+  max-width:0; overflow:hidden; opacity:0; color:var(--gray); font-size:10px; letter-spacing:.12em;
+  transition:max-width .25s ease,opacity .2s ease;
+}
+.brand:hover .brand-hint,.brand:focus-visible .brand-hint{max-width:220px; opacity:1;}
+.settings-row{display:flex; justify-content:flex-end; padding:10px 48px 11px;}
+.settings{display:flex; align-items:center; gap:18px;}
+.setting-control{display:flex; align-items:center; gap:6px; color:var(--gray);}
+.setting-icon{
+  width:14px; height:14px; flex:none; fill:none; stroke:currentColor; stroke-width:1.25;
+  stroke-linecap:round; stroke-linejoin:round;
+}
+nav{display:flex; gap:26px;}
+nav button{
+  font-size:11px; letter-spacing:.22em; color:var(--gray);
+  padding-bottom:3px; border-bottom:1px solid transparent;
+}
+nav button.on{color:var(--ink); border-bottom-color:var(--ink);}
+#langSel,#themeSel{font-size:10px; letter-spacing:.16em; color:var(--gray);}
+main{max-width:1020px; margin:0 auto; padding:64px 48px 80px;}
+.sim{display:grid; grid-template-columns:minmax(0,1fr) 300px; gap:72px; align-items:start;}
+@media (max-width:760px){
+  .header-main{padding:24px 24px 20px; flex-wrap:wrap; gap:18px;}
+  nav{width:100%; justify-content:flex-end; overflow-x:auto; gap:20px;}
+  .settings-row{padding:9px 24px 10px;}
+  .brand-hint{display:none;}
+  main{padding:40px 24px 64px;}
+  .sim{grid-template-columns:1fr; gap:48px;}
+}
+.stage svg{display:block; width:100%; max-width:480px; margin:0 auto;}
+.caption{text-align:center; margin-top:28px;}
+.caption .name{font-family:var(--serif); font-size:15px; letter-spacing:.08em;}
+.caption .spec{font-size:10px; letter-spacing:.3em; color:var(--faint); margin-top:6px;}
+.capbtns{display:flex; gap:24px; justify-content:center; margin-top:20px;}
+.capbtns button, .favtools button{
+  font-size:10px; letter-spacing:.2em; color:var(--gray);
+  border-bottom:1px solid transparent; padding-bottom:2px;
+}
+.capbtns button:hover, .favtools button:hover{color:var(--ink); border-bottom-color:var(--ink);}
+.ctrl h2{
+  font-size:10px; font-weight:400; letter-spacing:.3em; color:var(--gray);
+  text-transform:uppercase; margin-bottom:14px;
+}
+.ctrl section{padding:26px 0; border-bottom:1px solid var(--hairline);}
+.ctrl section:first-child{padding-top:0;}
+#modelSel{
+  width:100%; font-size:13.5px; letter-spacing:.05em;
+  border-bottom:1px solid var(--hairline); padding:6px 18px 6px 0;
+}
+.model-note{font-size:11px; color:var(--faint); margin-top:12px; line-height:1.7;}
+.dots{display:flex; flex-wrap:wrap; gap:14px; padding:2px; align-items:center;}
+.dots button{
+  width:22px; height:22px; border-radius:50%; border:1px solid var(--hairline);
+}
+.dots button.on{outline:1px solid var(--ink); outline-offset:3px;}
+.dots .addc{
+  font-size:14px; color:var(--gray); line-height:1; background:transparent;
+  display:flex; align-items:center; justify-content:center;
+}
+.dots .addc:hover{color:var(--ink); border-color:var(--gray);}
+.dots .more-toggle{
+  width:auto; height:22px; border-radius:999px; padding:0 9px;
+  font-size:9.5px; letter-spacing:.12em; color:var(--gray); background:transparent;
+}
+.dots .more-toggle:hover{color:var(--ink); border-color:var(--gray);}
+#myColors{margin-top:12px;}
+.pickers{display:flex; align-items:center; gap:14px; margin-top:22px;}
+.pickers label{font-size:11px; color:var(--gray); letter-spacing:.08em;}
+input[type=color]{
+  -webkit-appearance:none; appearance:none; width:24px; height:24px; padding:0;
+  border:1px solid var(--hairline); border-radius:50%; background:none; cursor:pointer;
+}
+input[type=color]::-webkit-color-swatch-wrapper{padding:0;}
+input[type=color]::-webkit-color-swatch{border:none; border-radius:50%;}
+#swap{
+  margin-left:auto; font-size:11px; letter-spacing:.14em; color:var(--gray);
+  border-bottom:1px solid transparent; padding-bottom:2px;
+}
+#swap:hover{color:var(--ink); border-bottom-color:var(--ink);}
+.slider-row{display:flex; align-items:center; gap:16px; margin:16px 0;}
+.slider-row label{font-size:11px; color:var(--gray); letter-spacing:.08em; min-width:64px;}
+.slider-row output{font-size:12px; min-width:22px; text-align:right; font-variant-numeric:tabular-nums;}
+input[type=range]{
+  -webkit-appearance:none; appearance:none; flex:1; height:1px;
+  background:var(--hairline); outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; width:11px; height:11px; border-radius:50%;
+  background:var(--ink); border:none; cursor:pointer;
+}
+input[type=range]::-moz-range-thumb{
+  width:11px; height:11px; border-radius:50%; background:var(--ink); border:none; cursor:pointer;
+}
+.footnote{font-size:10.5px; color:var(--faint); line-height:1.7; padding-top:24px;}
+.favhead{display:flex; align-items:baseline; justify-content:space-between; max-width:720px; margin:0 auto 8px; gap:20px; flex-wrap:wrap;}
+.favhead h2{font-size:10px; font-weight:400; letter-spacing:.3em; color:var(--gray); text-transform:uppercase;}
+.favtools{display:flex; gap:20px; align-items:baseline;}
+#sortSel{font-size:10.5px; letter-spacing:.12em; color:var(--gray);}
+#sharedBar{
+  max-width:720px; margin:0 auto 8px; display:flex; gap:20px; align-items:baseline;
+  font-size:11px; color:var(--gray); letter-spacing:.08em; padding:10px 0;
+  border-bottom:1px solid var(--hairline);
+}
+#sharedBar button{
+  font-size:10px; letter-spacing:.18em; color:var(--gray);
+  border-bottom:1px solid transparent; padding-bottom:2px;
+}
+#sharedBar button:hover{color:var(--ink); border-bottom-color:var(--ink);}
+#favList{max-width:720px; margin:0 auto;}
+.fav{display:flex; align-items:center; gap:18px; padding:20px 0; border-bottom:1px solid var(--hairline);}
+.fav .grip{color:var(--faint); font-size:14px; cursor:grab; user-select:none;}
+.fav .sw{width:46px; height:46px; border:1px solid var(--hairline); cursor:pointer; flex-shrink:0;}
+.fav .info{flex:1; min-width:0; cursor:pointer;}
+.fav .nm{font-size:12.5px; letter-spacing:.1em; display:flex; align-items:baseline; gap:10px;}
+.fav .nm input{
+  border:none; border-bottom:1px solid var(--hairline); background:transparent;
+  font:inherit; outline:none; width:100%; max-width:260px; padding:0;
+}
+.fav .ren{font-size:11px; color:var(--faint);}
+.fav .ren:hover{color:var(--ink);}
+.fav .sp{font-size:9.5px; letter-spacing:.24em; color:var(--faint); margin-top:3px;}
+.fav .dt{font-size:9.5px; letter-spacing:.12em; color:var(--faint); margin-top:3px;}
+.fav .stars{display:flex; gap:3px;}
+.fav .stars button, .fav .stars span{font-size:13px; color:var(--faint); line-height:1;}
+.fav .stars .on{color:var(--ink);}
+.fav .ud{display:flex; flex-direction:column; gap:6px;}
+.fav .ud button{font-size:8px; color:var(--faint); line-height:1;}
+.fav .ud button:hover{color:var(--ink);}
+.fav .del{font-size:14px; color:var(--faint); padding:0 2px;}
+.fav .del:hover{color:var(--ink);}
+.fav.dragover{border-top:1px solid var(--ink);}
+.empty{max-width:720px; margin:48px auto; text-align:center; font-size:12px; color:var(--faint); letter-spacing:.08em;}
+article{max-width:620px; margin:0 auto;}
+article .lede{font-family:var(--serif); font-size:16px; line-height:2.2; margin-bottom:48px;}
+article h2{
+  font-size:10px; font-weight:400; letter-spacing:.3em; color:var(--gray);
+  text-transform:uppercase; margin:56px 0 18px; padding-top:32px; border-top:1px solid var(--hairline);
+}
+article h2:first-of-type{margin-top:0; padding-top:0; border-top:none;}
+article p{font-family:var(--serif); font-size:14.5px; line-height:2.2; margin-bottom:16px;}
+article .people{list-style:none;}
+article .people li{margin-bottom:18px;}
+article .people .who{font-family:var(--sans); font-size:12px; letter-spacing:.12em; display:block;}
+article .people .what{font-family:var(--serif); font-size:13.5px; line-height:2; color:#46443f;}
+article .tl{list-style:none;}
+article .tl li{display:flex; gap:20px; margin-bottom:14px;}
+article .tl .y{font-size:11px; letter-spacing:.1em; color:var(--gray); min-width:64px; padding-top:4px;}
+article .tl .t{font-family:var(--serif); font-size:13.5px; line-height:2; flex:1;}
+article .src{font-size:11px; color:var(--faint); line-height:1.9;}
+article a{color:var(--gray);}
+.about-release{
+  font-family:var(--serif); font-size:14.5px; line-height:2.2; color:var(--gray);
+  border-bottom:1px solid var(--gray); padding-bottom:2px;
+}
+.about-release:hover,.about-release:focus-visible{color:var(--ink); border-bottom-color:var(--ink);}
+.about-profile{white-space:pre-line;}
+footer{text-align:center; font-size:9px; letter-spacing:.3em; color:var(--faint); padding:48px 0 40px;}
+#footerBtn{color:var(--faint); letter-spacing:.3em; border-bottom:1px solid transparent; padding-bottom:3px;}
+#footerBtn:hover,#footerBtn:focus-visible{color:var(--ink); border-bottom-color:var(--ink);}
+dialog{
+  width:min(520px,calc(100% - 40px)); max-height:calc(100% - 40px); overflow:auto;
+  margin:auto; padding:34px; border:1px solid var(--hairline); background:var(--panel); color:var(--ink);
+}
+dialog::backdrop{background:var(--backdrop);}
+.release-head{display:flex; align-items:baseline; justify-content:space-between; gap:20px; border-bottom:1px solid var(--hairline); padding-bottom:18px;}
+.release-head h2{font-size:12px; font-weight:400; letter-spacing:.24em;}
+.release-head button{font-size:18px; color:var(--gray);}
+.release-version{font-family:var(--serif); font-size:18px; margin:26px 0 20px;}
+.release-list{list-style:none;}
+.release-list li{padding:16px 0; border-top:1px solid var(--hairline);}
+.release-list strong{display:block; font-size:10px; letter-spacing:.18em; color:var(--gray); font-weight:400; margin-bottom:5px;}
+.release-list span{display:block; font-family:var(--serif); font-size:13px; line-height:1.9;}
+.release-toggle{
+  display:block; margin:24px auto 0; font-size:10px; letter-spacing:.16em; color:var(--gray);
+  border-bottom:1px solid var(--gray); padding-bottom:2px;
+}
+.release-toggle:hover,.release-toggle:focus-visible{color:var(--ink); border-bottom-color:var(--ink);}
+.hidden{display:none !important;}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-main">
+    <button class="brand" id="brandBtn" type="button">
+      <span class="wordmark">shima-shima</span>
+      <span class="brand-hint" id="brandHint">ボーダーシャツシミュレーター</span>
+    </button>
+    <nav>
+      <button id="tabSim" class="on" data-view="sim">simulator</button>
+      <button id="tabFav" data-view="fav">favorites</button>
+      <button id="tabRead" data-view="jour">journal</button>
+      <button id="tabAbout" data-view="about">shima-shima</button>
+    </nav>
+  </div>
+  <div class="settings-row">
+    <div class="settings">
+      <label class="setting-control">
+        <svg class="setting-icon" aria-hidden="true" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9"></circle>
+          <path d="M3 12h18M12 3c2.4 2.5 3.6 5.5 3.6 9s-1.2 6.5-3.6 9c-2.4-2.5-3.6-5.5-3.6-9S9.6 5.5 12 3Z"></path>
+        </svg>
+        <select id="langSel" aria-label="language">
+          <option value="ja">JPN</option>
+          <option value="en">ENG</option>
+          <option value="fr">FRA</option>
+        </select>
+      </label>
+      <label class="setting-control">
+        <svg class="setting-icon" id="themeIcon" aria-hidden="true" viewBox="0 0 24 24"></svg>
+        <select id="themeSel" aria-label="theme">
+          <option value="light">light</option>
+          <option value="dark">dark</option>
+          <option value="system">system</option>
+        </select>
+      </label>
+    </div>
+  </div>
+</header>
+
+<main>
+<section id="viewSim" class="sim">
+  <div class="stage">
+    <svg viewBox="0 0 460 460" role="img" aria-label="border tee preview">
+      <defs>
+        <pattern id="st" patternUnits="userSpaceOnUse" width="10" height="16">
+          <rect id="pBase" width="10" height="16" fill="#F2EDE0"></rect>
+          <rect id="pStripe" width="10" height="8" fill="#1F2A44"></rect>
+        </pattern>
+        <clipPath id="tee">
+          <path d="M120,96 L185,82 Q230,106 275,82 L340,96 L438,352 L396,366 L336,180 L336,408 L124,408 L124,180 L64,366 L22,352 Z"></path>
+        </clipPath>
+      </defs>
+      <g clip-path="url(#tee)">
+        <rect x="20" y="60" width="420" height="370" fill="url(#st)"></rect>
+        <rect id="plainRect" x="20" y="60" width="420" height="0" fill="#F2EDE0"></rect>
+      </g>
+      <path d="M120,96 L185,82 Q230,106 275,82 L340,96 L438,352 L396,366 L336,180 L336,408 L124,408 L124,180 L64,366 L22,352 Z" fill="none" stroke="#d8d3c8" stroke-width="1"></path>
+      <path d="M185,82 Q230,106 275,82" fill="none" stroke="#d8d3c8" stroke-width="1"></path>
+    </svg>
+    <div class="caption">
+      <p class="name" id="modelName"></p>
+      <p class="spec" id="specLine"></p>
+      <div class="capbtns">
+        <button id="todayBtn"></button>
+        <button id="shareBtn"></button>
+        <button id="dlTeeBtn"></button>
+        <button id="addFav"></button>
+      </div>
+    </div>
+  </div>
+
+  <div class="ctrl">
+    <section>
+      <h2 id="hModel">model</h2>
+      <select id="modelSel"></select>
+      <p class="model-note" id="modelNote"></p>
+    </section>
+
+    <section>
+      <h2 id="hColor">colorway</h2>
+      <div class="dots" id="palettes"></div>
+      <div class="dots" id="myColors"></div>
+      <div class="pickers">
+        <label id="lbBase" for="base"></label><input type="color" id="base" value="#F2EDE0">
+        <span id="singleStripeCtrl" style="display:inline-flex; align-items:center; gap:14px;">
+          <label id="lbStripe" for="stripe"></label><input type="color" id="stripe" value="#1F2A44">
+          <button id="swap"></button>
+        </span>
+        <span id="multiStripeCtrl" class="hidden" style="display:inline-flex; align-items:center; gap:8px;">
+          <label id="lbMulti" style="font-size:11px; color:var(--gray); letter-spacing:.08em;"></label>
+          <span style="display:inline-flex; gap:8px;">
+            <input type="color" class="multi-color-input" data-index="0" value="#0A4AB3">
+            <input type="color" class="multi-color-input" data-index="1" value="#7A7A7A">
+            <input type="color" class="multi-color-input" data-index="2" value="#D32F2F">
+            <input type="color" class="multi-color-input" data-index="3" value="#5D9CEC">
+            <input type="color" class="multi-color-input" data-index="4" value="#1A2536">
+            <input type="color" class="multi-color-input" data-index="5" value="#8C7A6B">
+          </span>
+        </span>
+      </div>
+    </section>
+
+    <section style="border-bottom:none;">
+      <h2 id="hStripe">stripe</h2>
+      <div class="slider-row">
+        <label id="lbSw" for="sw"></label>
+        <input type="range" id="sw" min="2" max="20" step="1" value="8">
+        <output id="swOut">8</output>
+      </div>
+      <div class="slider-row">
+        <label id="lbGw" for="gw"></label>
+        <input type="range" id="gw" min="2" max="32" step="1" value="8">
+        <output id="gwOut">8</output>
+      </div>
+      <div class="slider-row">
+        <label id="lbPl" for="pl"></label>
+        <input type="range" id="pl" min="0" max="160" step="1" value="0">
+        <output id="plOut">0</output>
+      </div>
+      <p class="footnote" id="footnote"></p>
+    </section>
+  </div>
+</section>
+
+<section id="viewFav" class="hidden">
+  <div class="favhead">
+    <h2 id="favTitle">favorites</h2>
+    <div class="favtools" id="favTools">
+      <select id="sortSel"></select>
+    </div>
+  </div>
+  <div id="sharedBar" class="hidden">
+    <span id="sharedMsg"></span>
+    <button id="importBtn"></button>
+    <button id="closeShared"></button>
+  </div>
+  <div id="favList"></div>
+</section>
+
+<section id="viewJour" class="hidden">
+  <article id="journal"></article>
+</section>
+
+<section id="viewAbout" class="hidden">
+  <article id="about"></article>
+</section>
+</main>
+
+<footer><button id="footerBtn" type="button">shima-shima by sirop</button></footer>
+
+<dialog id="releaseDialog">
+  <div class="release-head">
+    <h2 id="releaseTitle">shima-shima</h2>
+    <button id="releaseClose" type="button" aria-label="close">×</button>
+  </div>
+  <p class="release-version" id="releaseVersion"></p>
+  <ol class="release-list" id="releaseList"></ol>
+  <button class="release-toggle" id="releaseToggle" type="button" aria-controls="releaseList" aria-expanded="false"></button>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js" integrity="sha384-lQXOAyZwHXE55JFyrOMB7nY2Wv+m5ZWNtJcHrd1rceRQXAYNLak8ukN5TjBTcIwz" crossorigin="anonymous"></script>
+<script>
+const VERSION = "shima-shima_v015";
+const KEY_STATE = "shima-shima_state";
+const KEY_FAVS = "shima-shima_favorites";
+const KEY_LANG = "shima-shima_lang";
+const KEY_MYCOLORS = "shima-shima_mycolors";
+const KEY_THEME = "shima-shima_theme";
+const $ = id => document.getElementById(id);
+
+const RELEASES = [
+  {v:"v015", date:"2026.06.12", text:{
+    ja:"基本12カラーバリエーションと、遊び色・逆配色を展開できるmoreボタン、3言語の配色名を追加。",
+    en:"Added 12 always-visible colorways, a more button for playful and reversed colors, and colorway names in three languages.",
+    fr:"Ajout de 12 coloris toujours visibles, d’un bouton more pour les variantes ludiques et inversées, et de noms de coloris en trois langues."
+  }},
+  {v:"v014", date:"2026.06.12", text:{
+    ja:"二段ヘッダー、JPN / ENG / FRA、グレースケール極細設定アイコン、ABOUT sirop、全履歴へ展開できるdevelopment journalを追加。",
+    en:"Added a two-row header, JPN / ENG / FRA labels, thin grayscale icons, ABOUT sirop, and a development journal expandable to the full history.",
+    fr:"Ajout d’un en-tête sur deux rangées, des labels JPN / ENG / FRA, d’icônes fines, de ABOUT sirop et d’un journal de développement extensible à tout l’historique."
+  }},
+  {v:"v013", date:"2026.06.12", text:{
+    ja:"ライト・ダーク・システム設定、ロゴのsimulator導線、サイト説明、版情報ダイアログを追加。",
+    en:"Added light, dark, and system themes, logo navigation, clearer site identity, and a release dialog.",
+    fr:"Ajout des thèmes clair, sombre et système, de la navigation par le logo, d’une présentation plus claire et du dialogue des versions."
+  }},
+  {v:"v012", date:"2026.06.12", text:{
+    ja:"「shima-shima」タブを新設し、名前の由来とborder / stripeの呼称を3言語で紹介。",
+    en:"Added the shima-shima tab, explaining the name and the border / stripe naming twist in three languages.",
+    fr:"Ajout de l’onglet shima-shima, présentant le nom et le décalage border / stripe en trois langues."
+  }},
+  {v:"v011", date:"2026.06.12", text:{
+    ja:"Journalに欧米への波及、年表、参考資料を追加・更新。",
+    en:"Expanded the journal with the stripe’s spread across the sea, timeline entries, and references.",
+    fr:"Développement du journal avec la diffusion au-delà des mers, de nouveaux repères et des références."
+  }},
+  {v:"v010", date:"2026.06.11", text:{
+    ja:"Journalから特定アイコンを非表示化。",
+    en:"Removed a specific icon from the journal.",
+    fr:"Retrait d’une icône spécifique du journal."
+  }},
+  {v:"v009", date:"2026.06.11", text:{
+    ja:"Journalの歴史記述をファクトチェックし、3言語で更新。",
+    en:"Fact-checked and updated the journal’s history in three languages.",
+    fr:"Vérification factuelle et mise à jour de l’histoire du journal en trois langues."
+  }},
+  {v:"v008", date:"2026.06.11", text:{
+    ja:"6色マルチカラーボーダーと、色ごとの調整機能を追加。",
+    en:"Added six-color multi-stripes with individual color controls.",
+    fr:"Ajout de rayures multicolores à six couleurs avec réglages individuels."
+  }},
+  {v:"v007", date:"2026.06.11", text:{
+    ja:"共有・画像保存をsimulatorへ集約し、Tシャツポスター画像を刷新。",
+    en:"Moved sharing and image export into the simulator and refreshed the shirt poster.",
+    fr:"Regroupement du partage et de l’export dans le simulateur, avec une nouvelle affiche."
+  }},
+  {v:"v006", date:"2026.06.11", text:{
+    ja:"Journalを一次・公式資料中心へ整え、参考リンクを更新。",
+    en:"Refined the journal around primary and official sources and updated references.",
+    fr:"Révision du journal autour de sources primaires et officielles, avec références mises à jour."
+  }},
+  {v:"v005", date:"2026.06.11", text:{
+    ja:"SimulatorとREADMEのプリセット名・説明を、非公式な符牒表記へ統一。",
+    en:"Standardised simulator and README preset names with unofficial codenames.",
+    fr:"Harmonisation des noms de préréglages du simulateur et du README avec des codes non officiels."
+  }},
+  {v:"v004", date:"2026.06.11", text:{
+    ja:"手動並べ替え、リネーム、共有リンク、今日の一枚、マイカラー、画像保存を追加。",
+    en:"Added manual ordering, renaming, share links, today’s stripe, saved colors, and image export.",
+    fr:"Ajout du tri manuel, renommage, liens de partage, rayure du jour, couleurs sauvegardées et export."
+  }},
+  {v:"v003", date:"2026.06.11", text:{
+    ja:"お気に入り、3言語切替、モデル選択を追加。",
+    en:"Added favorites, three-language switching, and model selection.",
+    fr:"Ajout des favoris, du changement entre trois langues et du choix de modèle."
+  }},
+  {v:"v002", date:"2026.06.11", text:{
+    ja:"エディトリアル調のデザインと長袖シルエットへ刷新。",
+    en:"Redesigned the interface with an editorial look and a long-sleeve silhouette.",
+    fr:"Nouvelle interface éditoriale et silhouette à manches longues."
+  }},
+  {v:"v001", date:"2026.06.11", text:{
+    ja:"ボーダーシャツシミュレーターの初版を公開。",
+    en:"Published the first version of the border shirt simulator.",
+    fr:"Publication de la première version du simulateur de marinières."
+  }}
+];
+
+const MODELS = [
+  {id:"sj-ouessant", sw:8, gw:8, pl:0, base:"#F2EDE0", stripe:"#1F2A44"},
+  {id:"sj-naval", sw:6, gw:12, pl:77, base:"#F5F1E6", stripe:"#1F2A44"},
+  {id:"sj-morlaix", sw:4, gw:9, pl:0, base:"#F7F4EA", stripe:"#27324F"},
+  {id:"bee-russell", sw:6, gw:13, pl:0, base:"#EFE9DA", stripe:"#27324F"},
+  {id:"bee-multi", sw:6, gw:12, pl:0, base:"#FFFFFF", stripes:["#0A4AB3","#7A7A7A","#D32F2F","#5D9CEC","#1A2536","#8C7A6B"]},
+  {id:"mj", sw:9, gw:14, pl:0, base:"#FFFFFF", stripe:"#2B3A55"},
+  {id:"uncl", sw:7, gw:12, pl:0, base:"#FFFFFF", stripe:"#233A5C"},
+  {id:"original", sw:8, gw:10, pl:0, base:"#FFFFFF", stripe:"#C3A6DE"}
+];
+
+const PALETTES = [
+  {base:"#F2EDE0", stripe:"#1F2A44", name:"ecruNavy"},
+  {base:"#F2EDE0", stripe:"#B4302E", name:"ecruRed"},
+  {base:"#F2EDE0", stripe:"#36598A", name:"ecruBlue"},
+  {base:"#F1ECE0", stripe:"#1B1B1B", name:"ecruBlack"},
+  {base:"#FFFFFF", stripe:"#1F2A44", name:"whiteNavy"},
+  {base:"#FFFFFF", stripe:"#B4302E", name:"whiteRed"},
+  {base:"#FFFFFF", stripe:"#36598A", name:"whiteBlue"},
+  {base:"#1B1B1B", stripe:"#F5F5F0", name:"blackEcru"},
+  {base:"#B8B4AC", stripe:"#2E3440", name:"grayNavy"},
+  {base:"#F6E8C9", stripe:"#4A3328", name:"creamBrown"},
+  {base:"#F6E8C9", stripe:"#79AECA", name:"creamLightBlue"},
+  {base:"#FFFFFF", stripe:"#C3A6DE", name:"whiteLavender"}
+];
+
+const MORE_PALETTES = [
+  {base:"#FFFFFF", stripe:"#1B1B1B", name:"whiteBlack"},
+  {base:"#F2EDE0", stripe:"#2E5E4E", name:"ecruGreen"},
+  {base:"#F2EDE0", stripe:"#B87D3B", name:"ecruOrange"},
+  {base:"#F2EDE0", stripe:"#C66B85", name:"ecruPink"},
+  {base:"#F6E8C9", stripe:"#668B6A", name:"creamGreen"},
+  {base:"#F6E8C9", stripe:"#7F3345", name:"creamBurgundy"},
+  {base:"#D8EAF1", stripe:"#1F2A44", name:"lightBlueNavy"},
+  {base:"#F3E3E3", stripe:"#8A4B6B", name:"pinkBurgundy"},
+  {base:"#E3EAE3", stripe:"#1F2A44", name:"sageNavy"},
+  {base:"#1F2A44", stripe:"#F2EDE0", name:"navyEcru"},
+  {base:"#B4302E", stripe:"#FFFFFF", name:"redWhite"},
+  {base:"#4A3328", stripe:"#F6E8C9", name:"brownCream"}
+];
+
+const TODAY_LIGHTS = ["#F2EDE0","#F5F1E6","#FFFFFF","#F1ECE0","#E8D9B0","#B8B4AC","#F3E3E3","#E3EAE3"];
+const TODAY_DARKS = ["#1F2A44","#27324F","#B4302E","#1B1B1B","#2E5E4E","#36598A","#8A4B6B","#B87D3B","#2E3440","#6B5B95"];
+
+const I18N = {
+ja:{
+  nav:["simulator","favorites","journal","shima-shima"],
+  hModel:"model", hColor:"colorway", hStripe:"stripe",
+  models:{
+    "sj-ouessant":"SJウエッソン風", "sj-naval":"SJナバル風", "sj-morlaix":"SJモーレ風",
+    "bee-russell":"蜂 ラッセル風", "bee-multi":"蜂 マルチカラー風", "mj":"MJ風", "uncl":"UNCL風", "original":"オリジナル"
+  },
+  notes:{
+    "sj-ouessant":"SJの定番。厚手・等ピッチ・全面ボーダー。",
+    "sj-naval":"胸元が無地のタイプ。細めの縞が下半分に入る。",
+    "sj-morlaix":"薄手・細ピッチ。春夏向けの軽い表情。",
+    "bee-russell":"目の詰まった生地に細めの縞。間隔広めで上品。",
+    "bee-multi":"マルチカラーの等ピッチ縞。6色の遊び心ある配色。",
+    "mj":"太番手の白地。日常着のすっきりしたボーダー。",
+    "uncl":"標準的なピッチのクルーT系。気軽な普段着。",
+    "original":"自由設定。スライダーと色で好きな1枚を。"
+  },
+  base:"地色", stripe:"線色", swap:"入れ替え", multi:"線色",
+  sw:"線の太さ", gw:"地の間隔", pl:"胸元の無地",
+  footnote:"プリセットは実在の名作を観察した「〜風」の再現です。特定ブランドの公式設定ではありません。",
+  addFav:"＋ お気に入りに登録", added:"登録しました",
+  today:"今日の一枚", todayName:"今日の一枚",
+  share:"共有リンク", copied:"✓ コピーしました",
+  download:"画像で保存",
+  sorts:["★順","新しい順","古い順","A→Z","Z→A","手動"],
+  empty:"まだお気に入りがありません。simulatorで「お気に入りに登録」を。",
+  del:"削除", rename:"名前を変更",
+  myColorAdd:"いまの配色をマイカラーに登録", myColorTip:"クリックで適用 / ダブルクリックで削除",
+  moreColors:"more ＋", lessColors:"close −",
+  colorways:{
+    ecruNavy:"生成り × 紺", ecruRed:"生成り × 赤", ecruBlue:"生成り × 青", ecruBlack:"生成り × 黒",
+    whiteNavy:"白 × 紺", whiteRed:"白 × 赤", whiteBlue:"白 × 青", blackEcru:"黒 × 生成り",
+    grayNavy:"グレー × 紺", creamBrown:"クリーム × 茶", creamLightBlue:"クリーム × 水色", whiteLavender:"白 × ラベンダー",
+    whiteBlack:"白 × 黒", ecruGreen:"生成り × 緑", ecruOrange:"生成り × オレンジ", ecruPink:"生成り × ピンク",
+    creamGreen:"クリーム × 緑", creamBurgundy:"クリーム × バーガンディ", lightBlueNavy:"水色 × 紺", pinkBurgundy:"淡いピンク × バーガンディ",
+    sageNavy:"セージ × 紺", navyEcru:"紺 × 生成り", redWhite:"赤 × 白", brownCream:"茶 × クリーム"
+  },
+  sharedTitle:"共有されたお気に入り", importFavs:"自分のfavoritesに取り込む", close:"閉じる",
+  posterTitle:"わたしの好きな shima-shima",
+  brandHint:"ボーダーシャツシミュレーター",
+  themes:["ライト","ダーク","システム"],
+  releaseTitle:"バージョンと更新履歴", releaseVersion:"現在のバージョン",
+  releaseLink:"バージョンと更新履歴",
+  releaseAll:"すべての更新履歴を見る", releaseLatest:"最新5件へ戻る",
+  journal:{
+    lede:"ボーダーTは、ただの柄ではなく、海で働く人の背中から暮らしの定番へと歩いてきた「線の服」。その来歴を、歩く速度で。",
+    sections:[
+      {h:"origins — 成り立ち", ps:[
+        "1858年、フランス海軍は青と白の縞模様のニットを水兵の制服として規定しました。この横縞は、視界の悪い海上で海に落ちた仲間を見つけやすくするためという有名な通説がある一方で、古い伝統に由来するという見解もあります。",
+        "起源は16世紀頃、スペイン・バスク地方の船乗りたちが着ていた手編みのセーターにあるとされ、日本で「バスクシャツ」と呼ばれるのはこの説に由来すると言われています。"
+      ]},
+      {h:"into fashion — モードへ、そして日本へ", ps:[
+        "1910年代、ココ・シャネルが水兵の装いに着想を得て、労働着だったボーダーを女性のモードへ持ち込みました。1920年代には、アメリカ人画家のマーフィ夫妻が南仏のリゾートへ持ち込み、芸術家たちの間で休日の装いとして広まったとされます。",
+        "日本では、1980〜1990年代にかけてのマリンスタイルやフレンチカジュアルの流行を経て、誰もが着る「日常の風景」へと定着していきました。"
+      ]},
+      {h:"across the sea — 波及と再解釈", ps:[
+        "縞のシャツは海を渡り、その土地のカルチャーと結びついていきました。1950年代のハリウッドでは、ジェームス・ディーンやマーロン・ブランドが着たことで若者の反骨の記号になったとされます。1960年代には、イギリスのモッズたちが水兵のシャツとして取り入れ、ヌーヴェルヴァーグの映画は新しい女性像とともにスクリーンへ映し出しました。",
+        "2017年には、ニューヨーク近代美術館（MoMA）の「Items: Is Fashion Modern?」展にオーシバルのシャツが展示されました。フランスでは「Made in France」を象徴する服として語られることもあり、線の服はいまも歩き続けています。"
+      ]}
+    ],
+    iconsH:"icons — ボーダーを愛した人々",
+    icons:[
+      ["パブロ・ピカソ","ドアノー撮影の写真が有名。アトリエでの作業着として愛用しました。"],
+      ["ココ・シャネル","労働着を女性の日常着へと引き上げ、マリンルックを定義しました。"],
+      ["ジャン＝ポール・ゴルチエ","マリニエールを自身のシグネチャーとし、コレクションの主役に据えました。"]
+    ],
+    tlH:"timeline — 小さな年表",
+    tl:[
+      ["1858","フランス海軍がマリニエールを水兵の制服として公式採用"],
+      ["1889","セントジェームス創業（モン・サン＝ミッシェル近郊の町）"],
+      ["1910s","シャネルがファッションにボーダーを導入"],
+      ["1922","ル・ミノア誕生（ブルターニュ）※1936年説もあり"],
+      ["1923","マーフィ夫妻が南仏リゾートで流行させたとされる"],
+      ["1939","オーシバル創業。のちにフランス海軍へ制服を納める"],
+      ["1980-90s","日本でフレンチカジュアルブーム。以降、暮らしの定番へ"],
+      ["2012","モントブール仏産業再建相が着用し「Made in France」の象徴に"],
+      ["2017","MoMA「Items: Is Fashion Modern?」展にオーシバルを展示"]
+    ],
+    refsH:"references — 参考",
+    refs:'複数の公式・一次資料および解説資料を参照し、確認の弱い起源説や逸話は減らして構成しています。<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a> · <a href="https://en.wikipedia.org/wiki/Marini%C3%A8re" target="_blank" rel="noopener noreferrer">Marinière — Wikipedia</a>'
+  },
+  about:{
+    lede:"shima-shimaは、ボーダーシャツの縞・余白・配色を自由に試せるボーダーシャツシミュレーターです。「shima-shima」という名前のこと、そしてこのサイトの小さな自己紹介。",
+    sections:[
+      {h:"the name — しましま", ps:[
+        "日本語では、縞模様のことを愛着をこめて「しましま」と呼びます。線がくり返すように、音もくり返す。このサイトの名前は、その日本語の響きをそのままローマ字にしたものです。"
+      ]},
+      {h:"border と stripe — 呼び名のねじれ", ps:[
+        "日本では横縞を「ボーダー」、縦縞を「ストライプ」と呼び分けますが、これは日本だけの使い方とされます。英語では向きにかかわらず縞は stripe。border は本来「縁取り」を指す言葉です。",
+        "つまり「ボーダーT」は、海をわたると striped tee。呼び名のねじれもふくめて、縞をたのしむのがこのサイトです。"
+      ]},
+      {h:"about this site", ps:[
+        "simulatorで自分の縞をつくり、journalで線の服の来歴を歩く。プリセットは愛される定番を観察した「〜風」の再解釈で、特定ブランドの公式設定ではありません。"
+      ]},
+      {h:"ABOUT sirop", ps:[
+        "🍀 気になることはとにかくやってみないと始まらない！\n🍋 AIを回遊してオールジャンルを楽しみたい\n🍊 デジタルとアナログどっちも好き\n❤️ 目の前のモノゴトジカンを楽しむこと\n🌟 ことば・自転車・お散歩・写真・カメラ・カフェ・ポップス・シティポップ・Deep House・渋谷系\nいろいろ知りたいな 🕊"
+      ]}
+    ]
+  }
+},
+en:{
+  nav:["simulator","favorites","journal","shima-shima"],
+  hModel:"model", hColor:"colorway", hStripe:"stripe",
+  models:{
+    "sj-ouessant":"SJ Ouessant", "sj-naval":"SJ Naval", "sj-morlaix":"SJ Morlaix",
+    "bee-russell":"Bee Russell", "bee-multi":"Bee Multi-color", "mj":"MJ", "uncl":"UNCL", "original":"Original"
+  },
+  notes:{
+    "sj-ouessant":"The classic. Heavy jersey, even pitch, stripes all over.",
+    "sj-naval":"Plain chest, finer stripes on the lower body.",
+    "sj-morlaix":"Lightweight, fine pitch — for spring and summer.",
+    "bee-russell":"Dense fabric, fine stripes, generous spacing.",
+    "bee-multi":"Multi-colored stripes of even pitch. A playful 6-color combination.",
+    "mj":"Thick-yarn white ground. A clean everyday stripe.",
+    "uncl":"Standard crew-tee pitch, easy to wear.",
+    "original":"Free settings — find your own stripe."
+  },
+  base:"ground", stripe:"stripe", swap:"swap", multi:"stripes",
+  sw:"stripe width", gw:"spacing", pl:"plain chest",
+  footnote:"Presets are observations “in the style of” beloved classics — not official specifications of any brand.",
+  addFav:"＋ save to favorites", added:"saved",
+  today:"today’s stripe", todayName:"today’s stripe",
+  share:"share link", copied:"✓ copied",
+  download:"save image",
+  sorts:["by rating","newest","oldest","A→Z","Z→A","manual"],
+  empty:"No favorites yet — save one from the simulator.",
+  del:"delete", rename:"rename",
+  myColorAdd:"save current colors", myColorTip:"click to apply / double-click to remove",
+  moreColors:"more ＋", lessColors:"close −",
+  colorways:{
+    ecruNavy:"ecru × navy", ecruRed:"ecru × red", ecruBlue:"ecru × blue", ecruBlack:"ecru × black",
+    whiteNavy:"white × navy", whiteRed:"white × red", whiteBlue:"white × blue", blackEcru:"black × ecru",
+    grayNavy:"gray × navy", creamBrown:"cream × brown", creamLightBlue:"cream × light blue", whiteLavender:"white × lavender",
+    whiteBlack:"white × black", ecruGreen:"ecru × green", ecruOrange:"ecru × orange", ecruPink:"ecru × pink",
+    creamGreen:"cream × green", creamBurgundy:"cream × burgundy", lightBlueNavy:"light blue × navy", pinkBurgundy:"pale pink × burgundy",
+    sageNavy:"sage × navy", navyEcru:"navy × ecru", redWhite:"red × white", brownCream:"brown × cream"
+  },
+  sharedTitle:"shared favorites", importFavs:"add to my favorites", close:"close",
+  posterTitle:"my favorite shima-shima",
+  brandHint:"border shirt simulator",
+  themes:["light","dark","system"],
+  releaseTitle:"version & updates", releaseVersion:"current version",
+  releaseLink:"version & updates",
+  releaseAll:"view all updates", releaseLatest:"back to latest five",
+  journal:{
+    lede:"The breton stripe is more than a pattern — a garment of lines that walked from sailors’ backs into everyday wardrobes. Its story, at walking pace.",
+    sections:[
+      {h:"origins", ps:[
+        "In 1858, the French navy specified a blue-and-white striped knit for its sailors. While a popular legend says the stripes made it easier to spot sailors who fell overboard, other accounts trace it back to older maritime traditions.",
+        "The origins are said to date back to the 16th century hand-knit sweaters worn by Basque fishermen. This Basque connection is believed to be the source of the term 'basque shirt' widely used in Japan."
+      ]},
+      {h:"into fashion & Japan", ps:[
+        "In the 1910s, Coco Chanel drew inspiration from sailors’ workwear, bringing the stripe into women’s high fashion. In the 1920s, the American painter Gerald Murphy and his wife Sara are said to have brought sailors’ shirts to the Riviera, where the stripe spread among artists as holiday wear.",
+        "In Japan, the style spread widely during the French casual and marine style boom of the 1980s and 1990s, eventually settling in as a standard of daily wear."
+      ]},
+      {h:"across the sea", ps:[
+        "The striped shirt crossed oceans and took on new meanings. In 1950s Hollywood, James Dean and Marlon Brando are said to have turned it into a sign of youthful rebellion. In the 1960s, British mods adopted it as the “matelot” shirt, while New Wave cinema cast it on screen as the look of a new kind of woman.",
+        "In 2017, an Orcival shirt was exhibited at MoMA’s “Items: Is Fashion Modern?”. In France, the marinière is sometimes invoked as a symbol of “Made in France” — the garment of lines is still walking."
+      ]}
+    ],
+    iconsH:"icons",
+    icons:[
+      ["Pablo Picasso","Famous in Robert Doisneau's photographs, he wore it as his workshop attire."],
+      ["Coco Chanel","Elevated sailor workwear into women's everyday fashion, defining the marine look."],
+      ["Jean-Paul Gaultier","Adopted the marinière as his signature, placing it at the center of his collections."]
+    ],
+    tlH:"timeline",
+    tl:[
+      ["1858","The French navy specifies a blue-and-white striped knit for sailors"],
+      ["1889","Saint James is founded near Mont-Saint-Michel"],
+      ["1910s","Chanel introduces the stripe to women's fashion"],
+      ["1922","Le Minor is founded in Brittany (some accounts say 1936)"],
+      ["1923","Gerald and Sara Murphy are said to popularise the stripe on the Riviera"],
+      ["1939","Orcival is founded, later supplying uniforms to the French navy"],
+      ["1980-90s","French casual boom in Japan leads to stripes becoming an everyday staple"],
+      ["2012","French minister Arnaud Montebourg wears one as a “Made in France” symbol"],
+      ["2017","An Orcival shirt is shown at MoMA’s “Items: Is Fashion Modern?”"]
+    ],
+    refsH:"references",
+    refs:'Built from multiple official and public sources, with weakly supported origin stories and anecdotes deliberately reduced.<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a> · <a href="https://en.wikipedia.org/wiki/Marini%C3%A8re" target="_blank" rel="noopener noreferrer">Marinière — Wikipedia</a>'
+  },
+  about:{
+    lede:"shima-shima is a border shirt simulator for exploring stripes, spacing, and color combinations. About the name “shima-shima,” and a small introduction to this site.",
+    sections:[
+      {h:"the name", ps:[
+        "In Japanese, stripes are affectionately called “shima-shima” — the word repeats, just as the lines do. This site simply borrows that sound, romanised, as its name."
+      ]},
+      {h:"border vs stripe", ps:[
+        "In Japan, horizontal stripes are called “border” and vertical ones “stripe” — a usage said to be unique to Japanese fashion. In English, a stripe is a stripe whichever way it runs, and a border is an edge or a trim.",
+        "So a Japanese “border tee” becomes, across the sea, a striped tee. This site enjoys stripes — twisted names and all."
+      ]},
+      {h:"about this site", ps:[
+        "Make your own stripe in the simulator; walk the history of the garment in the journal. Presets are observations “in the style of” beloved classics — not official specifications of any brand."
+      ]},
+      {h:"ABOUT sirop", ps:[
+        "🍀 Nothing begins until I try whatever catches my curiosity.\n🍋 I want to wander among AIs and enjoy every kind of subject.\n🍊 I love both digital and analogue things.\n❤️ I enjoy the things, moments, and time right in front of me.\n🌟 Words, bicycles, walks, photography, cameras, cafés, pop, city pop, Deep House, and Shibuya-kei.\nThere is always more I want to discover. 🕊"
+      ]}
+    ]
+  }
+},
+fr:{
+  nav:["simulateur","favoris","journal","shima-shima"],
+  hModel:"modèle", hColor:"coloris", hStripe:"rayure",
+  models:{
+    "sj-ouessant":"SJ Ouessant", "sj-naval":"SJ Naval", "sj-morlaix":"SJ Morlaix",
+    "bee-russell":"Abeille Russell", "bee-multi":"Abeille Multicolore", "mj":"MJ", "uncl":"UNCL", "original":"Originale"
+  },
+  notes:{
+    "sj-ouessant":"Le grand classique. Jersey épais, rayures régulières sur tout le corps.",
+    "sj-naval":"Poitrine unie, rayures fines sur le bas.",
+    "sj-morlaix":"Léger, rayures fines — printemps-été.",
+    "bee-russell":"Tissu serré, rayures fines, espacement généreux.",
+    "bee-multi":"Rayures multicolores à pas régulier. Une combinaison ludique de 6 coloris.",
+    "mj":"Fond blanc en fil épais. Une rayure nette du quotidien.",
+    "uncl":"Rayure standard de tee-shirt, facile à porter.",
+    "original":"Réglages libres — trouvez votre propre rayure."
+  },
+  base:"fond", stripe:"rayure", swap:"inverser", multi:"rayures",
+  sw:"épaisseur", gw:"espacement", pl:"plastron uni",
+  footnote:"Les préréglages sont des observations « dans l’esprit de » classiques aimés — aucune spécification officielle d’une marque.",
+  addFav:"＋ ajouter aux favoris", added:"ajouté",
+  today:"la rayure du jour", todayName:"la rayure du jour",
+  share:"lien de partage", copied:"✓ copié",
+  download:"enregistrer l’image",
+  sorts:["par note","récents","anciens","A→Z","Z→A","manuel"],
+  empty:"Pas encore de favoris — enregistrez-en depuis le simulateur.",
+  del:"supprimer", rename:"renommer",
+  myColorAdd:"garder ces couleurs", myColorTip:"clic pour appliquer / double-clic pour retirer",
+  moreColors:"plus ＋", lessColors:"fermer −",
+  colorways:{
+    ecruNavy:"écru × marine", ecruRed:"écru × rouge", ecruBlue:"écru × bleu", ecruBlack:"écru × noir",
+    whiteNavy:"blanc × marine", whiteRed:"blanc × rouge", whiteBlue:"blanc × bleu", blackEcru:"noir × écru",
+    grayNavy:"gris × marine", creamBrown:"crème × brun", creamLightBlue:"crème × bleu ciel", whiteLavender:"blanc × lavande",
+    whiteBlack:"blanc × noir", ecruGreen:"écru × vert", ecruOrange:"écru × orange", ecruPink:"écru × rose",
+    creamGreen:"crème × vert", creamBurgundy:"crème × bordeaux", lightBlueNavy:"bleu ciel × marine", pinkBurgundy:"rose pâle × bordeaux",
+    sageNavy:"sauge × marine", navyEcru:"marine × écru", redWhite:"rouge × blanc", brownCream:"brun × crème"
+  },
+  sharedTitle:"favoris partagés", importFavs:"ajouter à mes favoris", close:"fermer",
+  posterTitle:"mon shima-shima préféré",
+  brandHint:"simulateur de marinières",
+  themes:["clair","sombre","système"],
+  releaseTitle:"version et mises à jour", releaseVersion:"version actuelle",
+  releaseLink:"version et mises à jour",
+  releaseAll:"voir toutes les mises à jour", releaseLatest:"revenir aux cinq dernières",
+  journal:{
+    lede:"La marinière est plus qu’un motif — un vêtement de lignes, passé du dos des marins aux garde-robes de tous les jours. Son histoire, au pas de promenade.",
+    sections:[
+      {h:"origines", ps:[
+        "En 1858, la Marine française définit officiellement un tricot rayé bleu et blanc pour ses marins. Si une légende populaire veut que ces rayures permettaient de repérer plus facilement les marins tombés à la mer, d'autres sources y voient l'héritage d'anciennes traditions maritimes.",
+        "Les origines remonteraient aux tricots faits main portés par les pêcheurs basques au XVIe siècle. C'est de là que viendrait l'appellation 'basque shirt' couramment employée au Japon."
+      ]},
+      {h:"vers la mode & le Japon", ps:[
+        "Dans les années 1910, Coco Chanel s'inspire de la tenue des marins pour introduire la marinière dans la haute couture féminine. Dans les années 1920, le peintre américain Gerald Murphy et son épouse Sara l'auraient introduite sur la Riviera, où la rayure s'est répandue parmi les artistes comme tenue de vacances.",
+        "Au Japon, le style s'est largement diffusé lors du boom du style décontracté français et marine des années 1980 et 1990, devenant finalement un classique du quotidien."
+      ]},
+      {h:"au-delà des mers", ps:[
+        "La chemise rayée a traversé les océans et pris de nouveaux sens. Dans le Hollywood des années 1950, James Dean et Marlon Brando en auraient fait un signe de rébellion juvénile. Dans les années 1960, les mods britanniques l'adoptent comme « chemise de matelot », tandis que la Nouvelle Vague la porte à l'écran comme l'allure d'une nouvelle femme.",
+        "En 2017, une marinière Orcival est exposée au MoMA lors de « Items: Is Fashion Modern? ». En France, elle est parfois brandie comme symbole du « Made in France » — le vêtement de lignes marche encore."
+      ]}
+    ],
+    iconsH:"icônes",
+    icons:[
+      ["Pablo Picasso","Célèbre sur les photos de Robert Doisneau, il la portait comme vêtement d'atelier."],
+      ["Coco Chanel","A élevé la marinière de travail au rang de mode féminine, définissant le look marine."],
+      ["Jean-Paul Gaultier","A fait de la marinière sa signature personnelle, la plaçant au cœur de ses défilés."]
+    ],
+    tlH:"repères",
+    tl:[
+      ["1858","La Marine française définit un tricot rayé bleu et blanc pour ses marins"],
+      ["1889","Fondation de Saint James près du Mont-Saint-Michel"],
+      ["1910s","Chanel introduit la marinière dans la mode féminine"],
+      ["1922","Fondation de Le Minor en Bretagne (certaines sources indiquent 1936)"],
+      ["1923","Gerald et Sara Murphy auraient lancé la rayure sur la Riviera"],
+      ["1939","Fondation d'Orcival, qui fournira plus tard la Marine nationale"],
+      ["1980-90s","Le boom décontracté français au Japon en fait un classique quotidien"],
+      ["2012","Le ministre Arnaud Montebourg en fait un symbole du « Made in France »"],
+      ["2017","Une marinière Orcival exposée au MoMA (« Items: Is Fashion Modern? »)"]
+    ],
+    refsH:"références",
+    refs:'Construit à partir de plusieurs sources officielles et publiques, en réduisant volontairement les récits d’origine et anecdotes peu étayés.<br><a href="https://www.chanel.com/us/about-chanel/the-house-of-chanel/" target="_blank" rel="noopener noreferrer">CHANEL history</a> · <a href="https://leminor.fr/en/pages/notre-histoire" target="_blank" rel="noopener noreferrer">Le Minor official history</a> · <a href="https://www.jeanpaulgaultier.com/pages/iconic-creations" target="_blank" rel="noopener noreferrer">Jean Paul Gaultier iconic creations</a> · <a href="https://en.wikipedia.org/wiki/Marini%C3%A8re" target="_blank" rel="noopener noreferrer">Marinière — Wikipedia</a>'
+  },
+  about:{
+    lede:"shima-shima est un simulateur de marinières pour explorer rayures, espacements et couleurs. Le nom « shima-shima », et une petite présentation de ce site.",
+    sections:[
+      {h:"le nom", ps:[
+        "En japonais, les rayures se disent affectueusement « shima-shima » — le mot se répète, comme les lignes. Ce site emprunte simplement ce son, romanisé, pour son nom."
+      ]},
+      {h:"« border » et « stripe »", ps:[
+        "Au Japon, les rayures horizontales se disent « border » et les verticales « stripe » — un usage que l’on dit propre à la mode japonaise. En anglais, une rayure est une stripe quelle que soit sa direction, et border désigne une bordure.",
+        "Ainsi, un « border tee » japonais devient, au-delà des mers, un striped tee — une marinière. Ce site aime les rayures, noms de travers compris."
+      ]},
+      {h:"à propos", ps:[
+        "Composez votre rayure dans le simulateur ; parcourez l’histoire du vêtement dans le journal. Les préréglages sont des observations « dans l’esprit de » classiques aimés — aucune spécification officielle d’une marque."
+      ]},
+      {h:"ABOUT sirop", ps:[
+        "🍀 Rien ne commence avant d’essayer ce qui éveille ma curiosité.\n🍋 J’aime voyager d’une IA à l’autre et explorer tous les genres.\n🍊 J’aime autant le numérique que l’analogique.\n❤️ J’aime profiter des choses, des instants et du temps devant moi.\n🌟 Les mots, le vélo, les promenades, la photographie, les appareils photo, les cafés, la pop, la city pop, la Deep House et le Shibuya-kei.\nIl y a toujours tant de choses que j’aimerais découvrir. 🕊"
+      ]}
+    ]
+  }
+}
+};
+
+let lang = "ja";
+let currentModel = MODELS[0];
+let favs = [];
+let myColors = [];
+let sortMode = 0;
+let sharedFavs = null;
+let captionOverride = null;
+let dragId = null;
+let theme = "system";
+let releaseExpanded = false;
+let moreColorsExpanded = false;
+
+function t(){ return I18N[lang]; }
+const collator = new Intl.Collator(["ja"], {numeric:true, sensitivity:"base"});
+const dispName = f => f.name || t().models[f.model] || f.model;
+const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
+
+function applyTheme(){
+  const resolved = theme === "system" ? (systemTheme.matches ? "dark" : "light") : theme;
+  document.documentElement.dataset.theme = resolved;
+  document.documentElement.style.colorScheme = resolved;
+  renderThemeIcon();
+}
+
+function renderThemeIcon(){
+  const paths = {
+    light:'<circle cx="12" cy="12" r="3.5"></circle><path d="M12 2.5v2M12 19.5v2M4.5 4.5l1.4 1.4M18.1 18.1l1.4 1.4M2.5 12h2M19.5 12h2M4.5 19.5l1.4-1.4M18.1 5.9l1.4-1.4"></path>',
+    dark:'<path d="M20.5 15.2A8.5 8.5 0 0 1 8.8 3.5 8.7 8.7 0 1 0 20.5 15.2Z"></path>',
+    system:'<circle cx="12" cy="12" r="8.5"></circle><path d="M12 3.5a8.5 8.5 0 0 1 0 17Z"></path>'
+  };
+  $("themeIcon").innerHTML = paths[theme];
+}
+
+function buildThemeSel(){
+  const sel = $("themeSel");
+  const labels = t().themes;
+  Array.from(sel.options).forEach((option, i) => { option.textContent = labels[i]; });
+  sel.value = theme;
+}
+
+const b64e = s => btoa(String.fromCharCode(...new TextEncoder().encode(s))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const b64d = s => {
+  s = s.replace(/-/g,"+").replace(/_/g,"/");
+  while(s.length % 4) s += "=";
+  return new TextDecoder().decode(Uint8Array.from(atob(s), c => c.charCodeAt(0)));
+};
+const pageUrl = () => location.href.split("#")[0];
+
+function render(){
+  const b = $("base").value, s = $("stripe").value;
+  const sw = +$("sw").value, gw = +$("gw").value, pl = +$("pl").value;
+  const isMulti = currentModel.id === "bee-multi";
+
+  $("singleStripeCtrl").classList.toggle("hidden", isMulti);
+  $("multiStripeCtrl").classList.toggle("hidden", !isMulti);
+  $("myColors").classList.toggle("hidden", isMulti);
+
+  if (isMulti) {
+    const inputs = document.querySelectorAll(".multi-color-input");
+    if (window.tempStripes && inputs.length === 6) {
+      inputs.forEach((input, idx) => {
+        input.value = window.tempStripes[idx] || "#000000";
+      });
+      delete window.tempStripes;
+    }
+    const colors = Array.from(inputs).map(input => input.value);
+    const totalH = (sw + gw) * 6;
+    $("st").setAttribute("height", totalH);
+    let patternHtml = `<rect id="pBase" width="10" height="${totalH}" fill="${b}"></rect>`;
+    for (let i = 0; i < 6; i++) {
+      const yPos = i * (sw + gw);
+      patternHtml += `<rect width="10" height="${sw}" y="${yPos}" fill="${colors[i]}"></rect>`;
+    }
+    $("st").innerHTML = patternHtml;
+  } else {
+    const totalH = sw + gw;
+    $("st").setAttribute("height", totalH);
+    $("st").innerHTML = `
+      <rect id="pBase" width="10" height="${totalH}" fill="${b}"></rect>
+      <rect id="pStripe" width="10" height="${sw}" fill="${s}"></rect>
+    `;
+  }
+
+  $("plainRect").setAttribute("fill", b);
+  $("plainRect").setAttribute("height", pl ? 60 + pl : 0);
+  $("swOut").textContent = sw;
+  $("gwOut").textContent = gw;
+  $("plOut").textContent = pl;
+  $("specLine").textContent = `STRIPE ${sw} · GAP ${gw} · PLAIN ${pl}`;
+  $("modelName").textContent = captionOverride || t().models[currentModel.id];
+  markPalette();
+  saveState();
+}
+
+function markPalette(){
+  const b = $("base").value.toUpperCase();
+  const isMulti = currentModel.id === "bee-multi";
+
+  if (isMulti) {
+    const stripes = Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value.toUpperCase());
+    document.querySelectorAll("#palettes button[data-multi-index]").forEach(btn => {
+      const i = Number(btn.dataset.multiIndex);
+      const p = MULTI_PALETTES[i];
+      if(!p) return;
+      const baseMatch = p.base.toUpperCase() === b;
+      const stripesMatch = p.stripes.every((color, idx) => color.toUpperCase() === stripes[idx]);
+      btn.classList.toggle("on", baseMatch && stripesMatch);
+    });
+  } else {
+    const s = $("stripe").value.toUpperCase();
+    const mark = (sel, arr) => document.querySelectorAll(sel).forEach(btn => {
+      const i = Number(btn.dataset.paletteIndex);
+      const p = arr[i];
+      if(!p) return;
+      btn.classList.toggle("on", p.base.toUpperCase() === b && p.stripe.toUpperCase() === s);
+    });
+    mark("#palettes button[data-palette-index]", [...PALETTES, ...MORE_PALETTES]);
+    document.querySelectorAll("#myColors button[data-palette-index]").forEach((btn, i) => {
+      const p = myColors[i];
+      btn.classList.toggle("on", !!p && p.base.toUpperCase() === b && p.stripe.toUpperCase() === s);
+    });
+  }
+}
+
+function applyModel(m, keepValues){
+  currentModel = m;
+  captionOverride = null;
+  if(!keepValues){
+    $("sw").value = m.sw; $("gw").value = m.gw; $("pl").value = m.pl;
+    $("base").value = m.base;
+    if (m.id === "bee-multi" && m.stripes) {
+      window.tempStripes = m.stripes;
+    } else if (m.stripe) {
+      $("stripe").value = m.stripe;
+    }
+  }
+  $("modelSel").value = m.id;
+  $("modelNote").textContent = t().notes[m.id];
+  renderPalettes();
+  render();
+}
+
+function buildModelSel(){
+  const sel = $("modelSel");
+  sel.innerHTML = "";
+  MODELS.forEach(m => {
+    const o = document.createElement("option");
+    o.value = m.id;
+    o.textContent = t().models[m.id];
+    sel.appendChild(o);
+  });
+  sel.value = currentModel.id;
+}
+
+$("modelSel").addEventListener("change", e => {
+  applyModel(MODELS.find(m => m.id === e.target.value));
+});
+
+const MULTI_PALETTES = [
+  {base:"#FFFFFF", stripes:["#0A4AB3","#7A7A7A","#D32F2F","#5D9CEC","#1A2536","#8C7A6B"]}, // image2
+  {base:"#FFFFFF", stripes:["#0A4AB3","#F7C81E","#E95D0F","#6B3B9C","#319B42","#0E6EAC"]}  // image3
+];
+
+function renderPalettes(){
+  const palBox = $("palettes");
+  palBox.innerHTML = "";
+  const isMulti = currentModel.id === "bee-multi";
+
+  if (isMulti) {
+    MULTI_PALETTES.forEach((p, i) => {
+      const btn = document.createElement("button");
+      btn.dataset.multiIndex = i;
+      btn.style.background = `conic-gradient(
+        ${p.stripes[0]} 0 60deg, 
+        ${p.stripes[1]} 60deg 120deg, 
+        ${p.stripes[2]} 120deg 180deg, 
+        ${p.stripes[3]} 180deg 240deg, 
+        ${p.stripes[4]} 240deg 300deg, 
+        ${p.stripes[5]} 300deg 360deg
+      )`;
+      btn.setAttribute("aria-label", `Multi ${p.stripes.join(", ")}`);
+      btn.addEventListener("click", () => {
+        $("base").value = p.base;
+        const inputs = document.querySelectorAll(".multi-color-input");
+        inputs.forEach((input, idx) => {
+          input.value = p.stripes[idx] || "#000000";
+        });
+        captionOverride = null;
+        render();
+      });
+      palBox.appendChild(btn);
+    });
+  } else {
+    const visiblePalettes = moreColorsExpanded ? [...PALETTES, ...MORE_PALETTES] : PALETTES;
+    visiblePalettes.forEach((p, i) => {
+      const btn = document.createElement("button");
+      btn.dataset.paletteIndex = i;
+      btn.style.background = `linear-gradient(135deg, ${p.base} 50%, ${p.stripe} 50%)`;
+      btn.title = t().colorways[p.name];
+      btn.setAttribute("aria-label", t().colorways[p.name]);
+      btn.addEventListener("click", () => {
+        $("base").value = p.base;
+        $("stripe").value = p.stripe;
+        captionOverride = null;
+        render();
+      });
+      palBox.appendChild(btn);
+    });
+    const more = document.createElement("button");
+    more.className = "more-toggle";
+    more.textContent = moreColorsExpanded ? t().lessColors : t().moreColors;
+    more.setAttribute("aria-expanded", String(moreColorsExpanded));
+    more.setAttribute("aria-label", more.textContent);
+    more.addEventListener("click", () => {
+      moreColorsExpanded = !moreColorsExpanded;
+      renderPalettes();
+      markPalette();
+    });
+    palBox.appendChild(more);
+  }
+}
+
+function renderMyColors(){
+  const box = $("myColors");
+  box.innerHTML = "";
+  myColors.forEach((p, i) => {
+    const btn = document.createElement("button");
+    btn.dataset.paletteIndex = i;
+    btn.style.background = `linear-gradient(135deg, ${p.base} 50%, ${p.stripe} 50%)`;
+    btn.title = t().myColorTip;
+    btn.setAttribute("aria-label", `${p.base} / ${p.stripe}`);
+    btn.addEventListener("click", () => {
+      $("base").value = p.base;
+      $("stripe").value = p.stripe;
+      captionOverride = null;
+      render();
+    });
+    btn.addEventListener("dblclick", () => {
+      myColors.splice(i, 1);
+      saveMyColors();
+      renderMyColors();
+      markPalette();
+    });
+    box.appendChild(btn);
+  });
+  const add = document.createElement("button");
+  add.className = "addc";
+  add.textContent = "+";
+  add.title = t().myColorAdd;
+  add.setAttribute("aria-label", t().myColorAdd);
+  add.addEventListener("click", () => {
+    const b = $("base").value, s = $("stripe").value;
+    if(!myColors.some(p => p.base.toUpperCase() === b.toUpperCase() && p.stripe.toUpperCase() === s.toUpperCase())){
+      myColors.push({base: b, stripe: s});
+      saveMyColors();
+      renderMyColors();
+      markPalette();
+    }
+  });
+  box.appendChild(add);
+}
+
+$("swap").addEventListener("click", () => {
+  const b = $("base").value;
+  $("base").value = $("stripe").value;
+  $("stripe").value = b;
+  render();
+});
+
+["base","stripe","sw","gw","pl"].forEach(id => $(id).addEventListener("input", () => {
+  captionOverride = null;
+  render();
+}));
+
+function mulberry32(a){
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let x = Math.imul(a ^ a >>> 15, 1 | a);
+    x = x + Math.imul(x ^ x >>> 7, 61 | x) ^ x;
+    return ((x ^ x >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+$("todayBtn").addEventListener("click", () => {
+  const now = new Date();
+  const seed = now.getFullYear() * 10000 + (now.getMonth() + 1) * 100 + now.getDate();
+  const rng = mulberry32(seed);
+  let base = TODAY_LIGHTS[Math.floor(rng() * TODAY_LIGHTS.length)];
+  let stripe = TODAY_DARKS[Math.floor(rng() * TODAY_DARKS.length)];
+  if(rng() < 0.15){ const tmp = base; base = stripe; stripe = tmp; }
+  const sw = 3 + Math.floor(rng() * 12);
+  const gw = 4 + Math.floor(rng() * 17);
+  const pl = rng() < 0.15 ? 60 + Math.floor(rng() * 60) : 0;
+  currentModel = MODELS.find(m => m.id === "original");
+  $("modelSel").value = "original";
+  $("modelNote").textContent = t().notes.original;
+  $("base").value = base; $("stripe").value = stripe;
+  $("sw").value = sw; $("gw").value = gw; $("pl").value = pl;
+  const pad = n => String(n).padStart(2, "0");
+  captionOverride = `${t().todayName} — ${pad(now.getMonth()+1)}.${pad(now.getDate())}`;
+  render();
+});
+
+function copyText(url, btn){
+  const done = () => {
+    const orig = btn.dataset.label;
+    btn.textContent = t().copied;
+    setTimeout(() => { btn.textContent = orig; }, 1400);
+  };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(url).then(done, () => window.prompt("URL", url));
+  }else{
+    window.prompt("URL", url);
+  }
+}
+
+$("shareBtn").addEventListener("click", () => {
+  const isMulti = currentModel.id === "bee-multi";
+  const stripes = isMulti ? Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value) : null;
+  const d = [
+    currentModel.id, 
+    +$("sw").value, 
+    +$("gw").value, 
+    +$("pl").value, 
+    $("base").value, 
+    isMulti ? stripes[0] : $("stripe").value,
+    ...(isMulti ? [stripes] : [])
+  ];
+  copyText(pageUrl() + "#d=" + b64e(JSON.stringify(d)), $("shareBtn"));
+});
+
+// List sharing removed from UI, sharing now centered in simulator for single designs.
+
+const VIEWS = {sim:"viewSim", fav:"viewFav", jour:"viewJour", about:"viewAbout"};
+const TABS = {sim:"tabSim", fav:"tabFav", jour:"tabRead", about:"tabAbout"};
+function switchTab(view){
+  Object.keys(VIEWS).forEach(v => {
+    $(VIEWS[v]).classList.toggle("hidden", v !== view);
+    $(TABS[v]).classList.toggle("on", v === view);
+  });
+  if(view === "fav") renderFavs();
+}
+Object.keys(TABS).forEach(v => $(TABS[v]).addEventListener("click", () => switchTab(v)));
+$("brandBtn").addEventListener("click", () => switchTab("sim"));
+
+$("addFav").addEventListener("click", () => {
+  const maxOrder = favs.reduce((m, f) => Math.max(m, f.order ?? 0), -1);
+  const isMulti = currentModel.id === "bee-multi";
+  const stripes = isMulti ? Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value) : null;
+  favs.push({
+    id: Date.now(),
+    model: currentModel.id,
+    base: $("base").value,
+    stripe: isMulti ? stripes[0] : $("stripe").value,
+    sw: +$("sw").value, gw: +$("gw").value, pl: +$("pl").value,
+    rating: 0,
+    order: maxOrder + 1,
+    ...(isMulti ? { stripes } : {})
+  });
+  saveFavs();
+  const btn = $("addFav");
+  btn.textContent = "✓ " + t().added;
+  setTimeout(() => { btn.textContent = t().addFav; }, 1200);
+});
+
+function sortedFavs(){
+  const a = favs.slice();
+  if(sortMode === 0) a.sort((x,y) => y.rating - x.rating || y.id - x.id);
+  else if(sortMode === 1) a.sort((x,y) => y.id - x.id);
+  else if(sortMode === 2) a.sort((x,y) => x.id - y.id);
+  else if(sortMode === 3) a.sort((x,y) => collator.compare(dispName(x), dispName(y)));
+  else if(sortMode === 4) a.sort((x,y) => collator.compare(dispName(y), dispName(x)));
+  else a.sort((x,y) => (x.order ?? 0) - (y.order ?? 0));
+  return a;
+}
+
+function commitManualOrder(arr){
+  arr.forEach((f, i) => { f.order = i; });
+  saveFavs();
+  renderFavs();
+}
+
+function startRename(f, nmEl){
+  const input = document.createElement("input");
+  input.value = dispName(f);
+  input.maxLength = 40;
+  nmEl.innerHTML = "";
+  nmEl.appendChild(input);
+  input.focus();
+  input.select();
+  let done = false;
+  const commit = () => {
+    if(done) return;
+    done = true;
+    const v = input.value.trim();
+    if(!v || v === (t().models[f.model] || f.model)) delete f.name;
+    else f.name = v;
+    saveFavs();
+    renderFavs();
+  };
+  input.addEventListener("keydown", e => {
+    if(e.key === "Enter") commit();
+    if(e.key === "Escape"){ done = true; renderFavs(); }
+  });
+  input.addEventListener("blur", commit);
+  input.addEventListener("click", e => e.stopPropagation());
+}
+
+function favRow(f, opts){
+  const manual = opts.manual, readonly = opts.readonly;
+  const row = document.createElement("div");
+  row.className = "fav";
+
+  if(manual && !readonly){
+    const grip = document.createElement("span");
+    grip.className = "grip";
+    grip.textContent = "≡";
+    row.appendChild(grip);
+    row.draggable = true;
+    row.addEventListener("dragstart", e => {
+      dragId = f.id;
+      e.dataTransfer.effectAllowed = "move";
+    });
+    row.addEventListener("dragover", e => {
+      e.preventDefault();
+      row.classList.add("dragover");
+    });
+    row.addEventListener("dragleave", () => row.classList.remove("dragover"));
+    row.addEventListener("drop", e => {
+      e.preventDefault();
+      row.classList.remove("dragover");
+      if(dragId === null || dragId === f.id) return;
+      const arr = sortedFavs();
+      const from = arr.findIndex(x => x.id === dragId);
+      const to = arr.findIndex(x => x.id === f.id);
+      const [moved] = arr.splice(from, 1);
+      arr.splice(to, 0, moved);
+      dragId = null;
+      commitManualOrder(arr);
+    });
+  }
+
+  const sw = document.createElement("div");
+  sw.className = "sw";
+  if (f.model === "bee-multi" && f.stripes) {
+    let stops = [];
+    const sh = f.sw / 2;
+    const gh = f.gw / 2;
+    const step = sh + gh;
+    for (let i = 0; i < 6; i++) {
+      const c = f.stripes[i] || "#000";
+      const startStripe = i * step;
+      const endStripe = startStripe + sh;
+      const startGap = endStripe;
+      const endGap = startGap + gh;
+      stops.push(`${c} ${startStripe}px ${endStripe}px`);
+      stops.push(`${f.base} ${startGap}px ${endGap}px`);
+    }
+    sw.style.background = `linear-gradient(180deg, ${stops.join(", ")})`;
+    sw.style.backgroundSize = `100% ${step * 6}px`;
+  } else {
+    sw.style.background = `repeating-linear-gradient(180deg, ${f.stripe} 0 ${f.sw/2}px, ${f.base} ${f.sw/2}px ${(f.sw+f.gw)/2}px)`;
+  }
+  sw.addEventListener("click", () => loadFav(f));
+
+  const info = document.createElement("div");
+  info.className = "info";
+  const d = new Date(f.id);
+  const pad = n => String(n).padStart(2, "0");
+  const nm = document.createElement("p");
+  nm.className = "nm";
+  const nameSpan = document.createElement("span");
+  nameSpan.textContent = dispName(f);
+  nm.appendChild(nameSpan);
+  if(!readonly){
+    const ren = document.createElement("button");
+    ren.className = "ren";
+    ren.textContent = "✎";
+    ren.title = t().rename;
+    ren.setAttribute("aria-label", t().rename);
+    ren.addEventListener("click", e => {
+      e.stopPropagation();
+      startRename(f, nm);
+    });
+    nm.appendChild(ren);
+  }
+  const sp = document.createElement("p");
+  sp.className = "sp";
+  sp.textContent = `STRIPE ${f.sw} · GAP ${f.gw} · PLAIN ${f.pl} · ${f.base.toUpperCase()} / ${f.stripe.toUpperCase()}`;
+  const dt = document.createElement("p");
+  dt.className = "dt";
+  dt.textContent = `${d.getFullYear()}.${pad(d.getMonth()+1)}.${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  info.appendChild(nm);
+  info.appendChild(sp);
+  info.appendChild(dt);
+  info.addEventListener("click", () => loadFav(f));
+
+  const stars = document.createElement("div");
+  stars.className = "stars";
+  for(let i = 1; i <= 5; i++){
+    if(readonly){
+      const st = document.createElement("span");
+      st.textContent = i <= f.rating ? "★" : "☆";
+      if(i <= f.rating) st.classList.add("on");
+      stars.appendChild(st);
+    }else{
+      const st = document.createElement("button");
+      st.textContent = i <= f.rating ? "★" : "☆";
+      st.classList.toggle("on", i <= f.rating);
+      st.setAttribute("aria-label", `${i}`);
+      st.addEventListener("click", () => {
+        f.rating = (f.rating === i) ? 0 : i;
+        saveFavs();
+        renderFavs();
+      });
+      stars.appendChild(st);
+    }
+  }
+
+  row.appendChild(sw);
+  row.appendChild(info);
+  row.appendChild(stars);
+
+  if(manual && !readonly){
+    const ud = document.createElement("div");
+    ud.className = "ud";
+    [["▲", -1], ["▼", 1]].forEach(([sym, dir]) => {
+      const b = document.createElement("button");
+      b.textContent = sym;
+      b.addEventListener("click", () => {
+        const arr = sortedFavs();
+        const i = arr.findIndex(x => x.id === f.id);
+        const j = i + dir;
+        if(j < 0 || j >= arr.length) return;
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        commitManualOrder(arr);
+      });
+      ud.appendChild(b);
+    });
+    row.appendChild(ud);
+  }
+
+  if(!readonly){
+    const del = document.createElement("button");
+    del.className = "del";
+    del.textContent = "×";
+    del.title = t().del;
+    del.setAttribute("aria-label", t().del);
+    del.addEventListener("click", () => {
+      favs = favs.filter(x => x.id !== f.id);
+      saveFavs();
+      renderFavs();
+    });
+    row.appendChild(del);
+  }
+  return row;
+}
+
+function renderFavs(){
+  const box = $("favList");
+  box.innerHTML = "";
+  const shared = sharedFavs !== null;
+  $("favTools").classList.toggle("hidden", shared);
+  $("sharedBar").classList.toggle("hidden", !shared);
+  $("favTitle").textContent = shared ? t().sharedTitle : "favorites";
+
+  if(shared){
+    $("sharedMsg").textContent = `${sharedFavs.length}`;
+    sharedFavs.forEach(f => box.appendChild(favRow(f, {manual:false, readonly:true})));
+    return;
+  }
+  if(!favs.length){
+    const p = document.createElement("p");
+    p.className = "empty";
+    p.textContent = t().empty;
+    box.appendChild(p);
+    return;
+  }
+  const manual = sortMode === 5;
+  sortedFavs().forEach(f => box.appendChild(favRow(f, {manual, readonly:false})));
+}
+
+function loadFav(f){
+  const m = MODELS.find(x => x.id === f.model) || MODELS[MODELS.length-1];
+  currentModel = m;
+  $("base").value = f.base;
+  const isMulti = f.model === "bee-multi";
+  if (isMulti && f.stripes) {
+    const inputs = document.querySelectorAll(".multi-color-input");
+    inputs.forEach((input, idx) => {
+      input.value = f.stripes[idx] || "#000000";
+    });
+  } else {
+    $("stripe").value = f.stripe;
+  }
+  $("sw").value = f.sw; $("gw").value = f.gw; $("pl").value = f.pl;
+  $("modelSel").value = m.id;
+  $("modelNote").textContent = t().notes[m.id];
+  captionOverride = f.name || null;
+  renderPalettes();
+  render();
+  switchTab("sim");
+}
+
+$("sortSel").addEventListener("change", e => {
+  sortMode = +e.target.value;
+  renderFavs();
+});
+
+function buildSortSel(){
+  const sel = $("sortSel");
+  sel.innerHTML = "";
+  t().sorts.forEach((label, i) => {
+    const o = document.createElement("option");
+    o.value = i;
+    o.textContent = label;
+    sel.appendChild(o);
+  });
+  sel.value = sortMode;
+}
+
+$("importBtn").addEventListener("click", () => {
+  if(!sharedFavs) return;
+  let maxOrder = favs.reduce((m, f) => Math.max(m, f.order ?? 0), -1);
+  const now = Date.now();
+  sharedFavs.forEach((f, i) => {
+    favs.push({
+      id: now + i, model: f.model, base: f.base, stripe: f.stripe,
+      sw: f.sw, gw: f.gw, pl: f.pl, rating: f.rating || 0,
+      ...(f.name ? {name: f.name} : {}),
+      order: ++maxOrder
+    });
+  });
+  saveFavs();
+  sharedFavs = null;
+  renderFavs();
+});
+
+$("closeShared").addEventListener("click", () => {
+  sharedFavs = null;
+  renderFavs();
+});
+
+$("dlTeeBtn").addEventListener("click", () => {
+  const svgEl = document.querySelector(".stage svg");
+  const svgClone = svgEl.cloneNode(true);
+  svgClone.setAttribute("width", "540");
+  svgClone.setAttribute("height", "540");
+  svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+
+  const svgString = new XMLSerializer().serializeToString(svgClone);
+  const svgBlob = new Blob([svgString], { type: "image/svg+xml;charset=utf-8" });
+  const url = URL.createObjectURL(svgBlob);
+  const img = new Image();
+
+  img.onload = () => {
+    const W = 1080, H = 1350;
+    const cv = document.createElement("canvas");
+    cv.width = W; cv.height = H;
+    const ctx = cv.getContext("2d");
+    
+    // Draw background
+    ctx.fillStyle = "#faf9f6";
+    ctx.fillRect(0, 0, W, H);
+
+    // Title
+    ctx.fillStyle = "#1c1b19";
+    ctx.font = "38px 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif";
+    try { ctx.letterSpacing = "4px"; } catch(e) {}
+    ctx.textAlign = "center";
+    ctx.fillText(t().posterTitle, W / 2, 160);
+
+    // Divider under title
+    ctx.strokeStyle = "#e3e0d8";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(120, 220);
+    ctx.lineTo(W - 120, 220);
+    ctx.stroke();
+
+    // Draw T-shirt
+    ctx.drawImage(img, (W - 540) / 2, 280, 540, 540);
+
+    // Divider under T-shirt
+    ctx.beginPath();
+    ctx.moveTo(120, 880);
+    ctx.lineTo(W - 120, 880);
+    ctx.stroke();
+
+    // Text details (left aligned)
+    ctx.textAlign = "left";
+    try { ctx.letterSpacing = "0px"; } catch(e) {}
+
+    // Model Name
+    ctx.fillStyle = "#1c1b19";
+    ctx.font = "32px 'Hiragino Mincho ProN', 'Yu Mincho', Georgia, serif";
+    const modelText = captionOverride || t().models[currentModel.id];
+    ctx.fillText(modelText, 120, 950);
+
+    // Specs
+    ctx.fillStyle = "#8e8a82";
+    ctx.font = "18px 'Helvetica Neue', Helvetica, sans-serif";
+    try { ctx.letterSpacing = "4px"; } catch(e) {}
+    const sw = +$("sw").value, gw = +$("gw").value, pl = +$("pl").value;
+    ctx.fillText(`STRIPE ${sw} · GAP ${gw} · PLAIN ${pl}`, 120, 1005);
+
+    // Colors
+    try { ctx.letterSpacing = "2px"; } catch(e) {}
+    const bColor = $("base").value.toUpperCase();
+    const isMulti = currentModel.id === "bee-multi";
+    const colorText = isMulti ? `${bColor} / MULTI` : `${bColor} / ${$("stripe").value.toUpperCase()}`;
+    ctx.fillText(colorText, 120, 1050);
+
+    // Site Credit
+    ctx.fillStyle = "#b8b4aa";
+    ctx.font = "14px 'Helvetica Neue', Helvetica, sans-serif";
+    try { ctx.letterSpacing = "4px"; } catch(e) {}
+    ctx.fillText("SHIMA-SHIMA BY SIROP", 120, 1120);
+    try { ctx.letterSpacing = "0px"; } catch(e) {}
+    ctx.font = "12px 'Helvetica Neue', Helvetica, sans-serif";
+    ctx.fillText("sirop-d.github.io/shima-shima", 120, 1145);
+
+    // QR code
+    if (typeof qrcode !== "undefined") {
+      try {
+        const isMulti = currentModel.id === "bee-multi";
+        const stripes = isMulti ? Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value) : null;
+        const d = [
+          currentModel.id, 
+          sw, gw, pl, 
+          $("base").value, 
+          isMulti ? stripes[0] : $("stripe").value,
+          ...(isMulti ? [stripes] : [])
+        ];
+        const q = qrcode(0, "M");
+        q.addData(pageUrl() + "#d=" + b64e(JSON.stringify(d)));
+        q.make();
+        const n = q.getModuleCount();
+        const cell = Math.max(2, Math.floor(180 / n));
+        const qs = n * cell;
+        const qx = W - 120 - qs;
+        const qy = 930;
+        
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(qx - 10, qy - 10, qs + 20, qs + 20);
+        ctx.fillStyle = "#1c1b19";
+        for (let r = 0; r < n; r++) {
+          for (let c = 0; c < n; c++) {
+            if (q.isDark(r, c)) {
+              ctx.fillRect(qx + c * cell, qy + r * cell, cell, cell);
+            }
+          }
+        }
+      } catch(e) {
+        console.error("QR Code generation failed", e);
+      }
+    }
+
+    cv.toBlob(blob => {
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `shima-shima_${currentModel.id}.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    });
+
+    URL.revokeObjectURL(url);
+  };
+
+  img.onerror = (err) => {
+    console.error("Image load failed", err);
+    URL.revokeObjectURL(url);
+  };
+
+  img.src = url;
+});
+
+function renderJournal(){
+  const j = t().journal;
+  let html = `<p class="lede">${j.lede}</p>`;
+  j.sections.forEach(sec => {
+    html += `<h2>${sec.h}</h2>`;
+    sec.ps.forEach(p => { html += `<p>${p}</p>`; });
+  });
+  html += `<h2>${j.iconsH}</h2><ul class="people">`;
+  j.icons.forEach(([who, what]) => {
+    html += `<li><span class="who">${who}</span><span class="what">${what}</span></li>`;
+  });
+  html += `</ul><h2>${j.tlH}</h2><ul class="tl">`;
+  j.tl.forEach(([y, txt]) => {
+    html += `<li><span class="y">${y}</span><span class="t">${txt}</span></li>`;
+  });
+  html += `</ul><h2>${j.refsH}</h2><p class="src">${j.refs}</p>`;
+  $("journal").innerHTML = html;
+}
+
+function renderAbout(){
+  const a = t().about;
+  let html = `<p class="lede">${a.lede}</p>`;
+  a.sections.forEach((sec, i) => {
+    html += `<h2>${sec.h}</h2>`;
+    sec.ps.forEach(p => { html += `<p${i === a.sections.length - 1 ? ' class="about-profile"' : ""}>${p}</p>`; });
+    if(i === a.sections.length - 2){
+      html += `<button class="about-release" id="aboutReleaseBtn" type="button">shima-shima by sirop — ${t().releaseLink}</button>`;
+    }
+  });
+  $("about").innerHTML = html;
+  $("aboutReleaseBtn").addEventListener("click", openReleaseDialog);
+}
+
+function renderRelease(){
+  const d = t();
+  const releases = releaseExpanded ? RELEASES : RELEASES.slice(0, 5);
+  $("releaseTitle").textContent = d.releaseTitle;
+  $("releaseVersion").textContent = `${d.releaseVersion}: ${VERSION}`;
+  $("releaseClose").setAttribute("aria-label", d.close);
+  $("releaseList").innerHTML = releases.map(item =>
+    `<li><strong>${item.v} · ${item.date}</strong><span>${item.text[lang]}</span></li>`
+  ).join("");
+  $("releaseToggle").textContent = releaseExpanded ? d.releaseLatest : d.releaseAll;
+  $("releaseToggle").setAttribute("aria-expanded", String(releaseExpanded));
+}
+
+function applyLang(){
+  document.documentElement.lang = lang;
+  const d = t();
+  $("tabSim").textContent = d.nav[0];
+  $("tabFav").textContent = d.nav[1];
+  $("tabRead").textContent = d.nav[2];
+  $("tabAbout").textContent = d.nav[3];
+  $("brandHint").textContent = d.brandHint;
+  $("hModel").textContent = d.hModel;
+  $("hColor").textContent = d.hColor;
+  $("hStripe").textContent = d.hStripe;
+  $("lbBase").textContent = d.base;
+  $("lbStripe").textContent = d.stripe;
+  $("swap").textContent = d.swap;
+  $("lbSw").textContent = d.sw;
+  $("lbGw").textContent = d.gw;
+  $("lbPl").textContent = d.pl;
+  $("footnote").textContent = d.footnote;
+  $("addFav").textContent = d.addFav;
+  $("todayBtn").textContent = d.today;
+  $("shareBtn").textContent = d.share;
+  $("shareBtn").dataset.label = d.share;
+  $("dlTeeBtn").textContent = d.download;
+  $("dlTeeBtn").dataset.label = d.download;
+  $("importBtn").textContent = d.importFavs;
+  $("closeShared").textContent = d.close;
+  buildModelSel();
+  buildSortSel();
+  buildThemeSel();
+  renderPalettes();
+  renderMyColors();
+  $("modelNote").textContent = d.notes[currentModel.id];
+  $("modelName").textContent = captionOverride || d.models[currentModel.id];
+  renderJournal();
+  renderAbout();
+  renderRelease();
+  if(!$("viewFav").classList.contains("hidden")) renderFavs();
+  try{ localStorage.setItem(KEY_LANG, lang); }catch(e){}
+}
+
+$("langSel").addEventListener("change", e => {
+  lang = e.target.value;
+  applyLang();
+});
+
+$("themeSel").addEventListener("change", e => {
+  theme = e.target.value;
+  applyTheme();
+  try{ localStorage.setItem(KEY_THEME, theme); }catch(e){}
+});
+systemTheme.addEventListener("change", () => {
+  if(theme === "system") applyTheme();
+});
+
+function openReleaseDialog(){
+  releaseExpanded = false;
+  renderRelease();
+  $("releaseDialog").showModal();
+}
+
+$("footerBtn").addEventListener("click", openReleaseDialog);
+$("releaseToggle").addEventListener("click", () => {
+  releaseExpanded = !releaseExpanded;
+  renderRelease();
+});
+$("releaseClose").addEventListener("click", () => $("releaseDialog").close());
+$("releaseDialog").addEventListener("click", e => {
+  if(e.target === $("releaseDialog")) $("releaseDialog").close();
+});
+
+function saveState(){
+  try{
+    const isMulti = currentModel.id === "bee-multi";
+    const stripes = isMulti ? Array.from(document.querySelectorAll(".multi-color-input")).map(input => input.value) : null;
+    localStorage.setItem(KEY_STATE, JSON.stringify({
+      model: currentModel.id, base: $("base").value, stripe: $("stripe").value,
+      sw: $("sw").value, gw: $("gw").value, pl: $("pl").value,
+      ...(isMulti ? { stripes } : {})
+    }));
+  }catch(e){}
+}
+function saveFavs(){
+  try{ localStorage.setItem(KEY_FAVS, JSON.stringify(favs)); }catch(e){}
+}
+function saveMyColors(){
+  try{ localStorage.setItem(KEY_MYCOLORS, JSON.stringify(myColors)); }catch(e){}
+}
+
+function parseHash(){
+  const h = location.hash;
+  try{
+    if(h.startsWith("#d=")){
+      const arr = JSON.parse(b64d(h.slice(3)));
+      const [model, sw, gw, pl, base, stripe, stripes] = arr;
+      const m = MODELS.find(x => x.id === model) || MODELS[MODELS.length-1];
+      currentModel = m;
+      $("base").value = base;
+      if (model === "bee-multi" && stripes) {
+        window.tempStripes = stripes;
+      } else {
+        $("stripe").value = stripe;
+      }
+      $("sw").value = sw; $("gw").value = gw; $("pl").value = pl;
+      history.replaceState(null, "", pageUrl());
+      return "d";
+    }
+    if(h.startsWith("#f=")){
+      sharedFavs = JSON.parse(b64d(h.slice(3))).map((a, i) => ({
+        id: Date.now() + i, model: a[0], sw: a[1], gw: a[2], pl: a[3],
+        base: a[4], stripe: a[5], rating: a[6] || 0,
+        ...(a[7] ? {name: a[7]} : {})
+      }));
+      history.replaceState(null, "", pageUrl());
+      return "f";
+    }
+  }catch(e){}
+  return null;
+}
+
+window.addEventListener("hashchange", () => {
+  const mode = parseHash();
+  if(mode === "d"){ applyModel(currentModel, true); switchTab("sim"); }
+  else if(mode === "f"){ switchTab("fav"); }
+});
+
+function init(){
+  try{ lang = localStorage.getItem(KEY_LANG) || "ja"; }catch(e){}
+  if(!I18N[lang]) lang = "ja";
+  $("langSel").value = lang;
+  try{ theme = localStorage.getItem(KEY_THEME) || "system"; }catch(e){}
+  if(!["light","dark","system"].includes(theme)) theme = "system";
+  applyTheme();
+  try{ favs = JSON.parse(localStorage.getItem(KEY_FAVS)) || []; }catch(e){ favs = []; }
+  favs.forEach((f, i) => { if(typeof f.order !== "number") f.order = i; });
+  try{ myColors = JSON.parse(localStorage.getItem(KEY_MYCOLORS)) || []; }catch(e){ myColors = []; }
+
+  // Set up listeners for multi-color inputs
+  document.querySelectorAll(".multi-color-input").forEach(input => {
+    input.addEventListener("input", () => {
+      captionOverride = null;
+      render();
+    });
+  });
+
+  const hashMode = parseHash();
+  let loaded = hashMode === "d";
+  if(!loaded){
+    try{
+      const d = JSON.parse(localStorage.getItem(KEY_STATE));
+      if(d){
+        currentModel = MODELS.find(x => x.id === d.model) || MODELS[0];
+        $("base").value = d.base;
+        if (d.model === "bee-multi" && d.stripes) {
+          window.tempStripes = d.stripes;
+        } else {
+          $("stripe").value = d.stripe;
+        }
+        $("sw").value = d.sw; $("gw").value = d.gw; $("pl").value = d.pl;
+        loaded = true;
+      }
+    }catch(e){}
+  }
+  applyLang();
+  if(loaded) applyModel(currentModel, true);
+  else applyModel(MODELS[0]);
+  if(hashMode === "f") switchTab("fav");
+}
+init();
+</script>
+</body>
+</html>
